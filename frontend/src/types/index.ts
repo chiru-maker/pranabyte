@@ -105,6 +105,8 @@ export interface Visit {
   doctor_notes?: string;
   doctor_verified: boolean;
   verified_at?: string;
+  patient_confirmed?: boolean;
+  patient_confirmed_at?: string;
   created_at: string;
 }
 

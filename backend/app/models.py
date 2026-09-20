@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import (
-    Column, String, Integer, Float, Boolean, DateTime, Text, ForeignKey, Enum
+    Column, String, Integer, Float, Boolean, DateTime, Text, ForeignKey
 )
 from sqlalchemy.orm import relationship
 from backend.app.database import Base
@@ -16,7 +16,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
-    role = Column(String(32), nullable=False, default="patient") # patient, doctor, staff, admin
+    role = Column(String(32), nullable=False, default="patient") # patient, doctor, staff, nurse, admin
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -79,6 +79,8 @@ class Visit(Base):
     doctor_verified = Column(Boolean, default=False)
     verified_by_doctor_id = Column(String(64), ForeignKey("users.id"), nullable=True)
     verified_at = Column(DateTime, nullable=True)
+    patient_confirmed = Column(Boolean, default=False)
+    patient_confirmed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -88,6 +90,24 @@ class Visit(Base):
     contradictions = relationship("Contradiction", back_populates="visit")
     red_flags = relationship("RedFlag", back_populates="visit")
     conversations = relationship("AIConversation", back_populates="visit", cascade="all, delete-orphan")
+    vitals = relationship("VitalSign", back_populates="visit", cascade="all, delete-orphan")
+
+
+class VitalSign(Base):
+    __tablename__ = "vital_signs"
+
+    id = Column(String(64), primary_key=True, default=generate_uuid)
+    visit_id = Column(String(64), ForeignKey("visits.id"), nullable=False)
+    bp_systolic = Column(Integer, nullable=True) # e.g. 142
+    bp_diastolic = Column(Integer, nullable=True) # e.g. 90
+    heart_rate = Column(Integer, nullable=True) # bpm e.g. 78
+    spo2 = Column(Integer, nullable=True) # % e.g. 98
+    temperature = Column(Float, nullable=True) # deg F e.g. 98.6
+    respiratory_rate = Column(Integer, nullable=True) # bpm e.g. 18
+    recorded_by = Column(String(128), default="Sister Ananya Rao (Nurse)")
+    recorded_at = Column(DateTime, default=datetime.utcnow)
+
+    visit = relationship("Visit", back_populates="vitals")
 
 
 class ClinicalSource(Base):
@@ -113,7 +133,7 @@ class ClinicalFact(Base):
     category = Column(String(64), nullable=False) # chief_complaint, past_history, medication, allergy, symptom, observation, lab_result
     key_name = Column(String(128), nullable=False)
     value = Column(Text, nullable=False)
-    # 4 Status States: CONFIRMED (🟢), DOCUMENTED (🔵), UNCERTAIN (🟡), CONFLICTING (🔴)
+    # 4 Status States: CONFIRMED (🟢), DOCUMENTED (🔵), UNCERTAIN (🟡), CONFLICTING (🔴), REJECTED
     status = Column(String(32), default="CONFIRMED")
     source_id = Column(String(64), ForeignKey("clinical_sources.id"), nullable=True)
     source_citation = Column(Text, nullable=True)
@@ -247,7 +267,7 @@ class AuditLog(Base):
     visit_id = Column(String(64), ForeignKey("visits.id"), nullable=True)
     actor_id = Column(String(64), nullable=True)
     actor_name = Column(String(255), nullable=False)
-    actor_role = Column(String(32), nullable=False) # patient, doctor, staff, ai_system
+    actor_role = Column(String(32), nullable=False) # patient, doctor, staff, nurse, ai_system
     action = Column(String(128), nullable=False)
     details = Column(Text, nullable=True)
     ip_address = Column(String(64), nullable=True)

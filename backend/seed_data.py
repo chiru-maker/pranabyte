@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from backend.app.database import SessionLocal, engine, Base
 from backend.app.models import (
     User, Patient, Consent, Visit, ClinicalFact, ClinicalSource, Document, DocumentExtraction,
-    Contradiction, RedFlag, TimelineEvent, AuditLog
+    Contradiction, RedFlag, TimelineEvent, AuditLog, VitalSign
 )
 from backend.app.auth import get_password_hash
 
@@ -78,6 +78,8 @@ def seed_database():
         completeness_score=85,
         questions_asked_count=3,
         questions_avoided_count=12,
+        patient_confirmed=True,
+        patient_confirmed_at=datetime.utcnow(),
         ai_summary_draft="""### PATIENT CASE SUMMARY DRAFT
 *NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*
 
@@ -112,6 +114,19 @@ Central retrosternal chest pain for 3 days, accompanied by intermittent breathle
     db.add(visit)
     db.commit()
     db.refresh(visit)
+
+    # 4b. Create Triage Vitals
+    vitals = VitalSign(
+        visit_id=visit.id,
+        bp_systolic=142,
+        bp_diastolic=90,
+        heart_rate=78,
+        spo2=98,
+        temperature=98.6,
+        respiratory_rate=18,
+        recorded_by="Sister Ananya Rao (Nurse)"
+    )
+    db.add(vitals)
 
     # 5. Create Sources
     source_rx = ClinicalSource(

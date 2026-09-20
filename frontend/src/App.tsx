@@ -8,6 +8,7 @@ import { ConsentScreen } from './components/patient/ConsentScreen';
 import { CaseTakingVoice } from './components/patient/CaseTakingVoice';
 import { AdaptiveQuestionnaire } from './components/patient/AdaptiveQuestionnaire';
 import { DocumentUpload } from './components/patient/DocumentUpload';
+import { PatientCorrectionScreen } from './components/patient/PatientCorrectionScreen';
 import { DoctorDashboard } from './components/doctor/DoctorDashboard';
 import { StaffDashboard } from './components/staff/StaffDashboard';
 import { Patient, Visit, ClinicalFact, Contradiction, RedFlag, TimelineEvent } from './types';
@@ -15,7 +16,7 @@ import { Patient, Visit, ClinicalFact, Contradiction, RedFlag, TimelineEvent } f
 function MainApp() {
   const { role, switchRole } = useAuth();
 
-  // Patient Intake States (1: Register, 2: Consent, 3: Voice, 4: Questions, 5: Upload, 6: Completed)
+  // Patient Intake States (1: Register, 2: Consent, 3: Voice, 4: Questions, 5: Upload, 6: Patient Review & Confirm)
   const [patientStep, setPatientStep] = useState<number>(1);
   const [loadingVoice, setLoadingVoice] = useState(false);
 
@@ -365,7 +366,7 @@ function MainApp() {
           {role === 'patient' && (
             <div className="space-y-6">
               {/* Stepper Header */}
-              <div className="max-w-xl mx-auto flex items-center justify-between text-xs font-semibold text-slate-400 mb-4 px-2">
+              <div className="max-w-2xl mx-auto flex items-center justify-between text-xs font-semibold text-slate-400 mb-4 px-2">
                 <span className={patientStep >= 1 ? 'text-cyan-400 font-bold' : ''}>1. Registration</span>
                 <span>→</span>
                 <span className={patientStep >= 2 ? 'text-cyan-400 font-bold' : ''}>2. Consent</span>
@@ -375,6 +376,8 @@ function MainApp() {
                 <span className={patientStep >= 4 ? 'text-cyan-400 font-bold' : ''}>4. Adaptive Q&A</span>
                 <span>→</span>
                 <span className={patientStep >= 5 ? 'text-cyan-400 font-bold' : ''}>5. OCR Upload</span>
+                <span>→</span>
+                <span className={patientStep >= 6 ? 'text-cyan-400 font-bold' : ''}>6. Self-Review</span>
               </div>
 
               {patientStep === 1 && (
@@ -420,7 +423,15 @@ function MainApp() {
               {patientStep === 5 && (
                 <DocumentUpload
                   onDocumentProcessed={() => {}}
-                  onProceedToDoctor={() => switchRole('doctor')}
+                  onProceedToDoctor={() => setPatientStep(6)}
+                />
+              )}
+
+              {patientStep === 6 && (
+                <PatientCorrectionScreen
+                  visitId={currentVisit.id}
+                  patientName={currentPatient.name}
+                  onDone={() => switchRole('doctor')}
                 />
               )}
             </div>

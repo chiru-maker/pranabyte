@@ -17,6 +17,24 @@ class ModularAIService:
         self.gemini_key = settings.GEMINI_API_KEY
         self.openai_key = settings.OPENAI_API_KEY
 
+    def is_available(self) -> bool:
+        return bool(self.gemini_key or self.openai_key)
+
+    def generate_response(self, prompt: str) -> Optional[str]:
+        if self.provider == "gemini" and self.gemini_key:
+            try:
+                from google import genai
+                client = genai.Client(api_key=self.gemini_key)
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt
+                )
+                return response.text.strip()
+            except Exception as e:
+                logger.warning(f"Gemini API generation error: {e}")
+                return None
+        return None
+
     def analyze_voice_transcript(self, transcript: str, known_facts: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Parses patient spoken statement to extract chief complaints, symptoms, duration,
