@@ -1,0 +1,36 @@
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Node modules & build artifacts
+node_modules/
+dist/
+build/
+.next/
+
+# Python cache & tests
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases & uploads
+*.db
+*.sqlite
+*.sqlite3
+uploads/*
+!uploads/.gitkeep
+
+# Environment variables
+.env
+.env.local
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
