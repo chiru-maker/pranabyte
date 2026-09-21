@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle2, AlertCircle, Edit3, ShieldCheck, Sparkles, Send, ArrowRight } from 'lucide-react';
+import { API_BASE } from '../../api/client';
 
 interface FactItem {
   id: string;
@@ -48,7 +49,7 @@ export const PatientCorrectionScreen: React.FC<PatientCorrectionScreenProps> = (
   const handleSubmitReview = async () => {
     setIsSubmitting(true);
     try {
-      await fetch(`/api/v1/doctor/patient-confirm/${visitId || 'default'}`, {
+      await fetch(`${API_BASE}/doctor/patient-confirm/${visitId || 'default'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ corrections: disputeNotes })

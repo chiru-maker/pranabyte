@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { History, ArrowUpRight, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Sparkles, RefreshCw } from 'lucide-react';
+import { API_BASE } from '../../api/client';
 
 interface ChangeItem {
   category: string;
@@ -34,7 +35,7 @@ export const VisitChangesPanel: React.FC<VisitChangesPanelProps> = ({ patientId 
   const fetchChanges = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/doctor/changes/${patientId}`);
+      const res = await fetch(`${API_BASE}/doctor/changes/${patientId}`);
       if (res.ok) {
         const json = await res.json();
         setData(json);

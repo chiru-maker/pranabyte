@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, AlertTriangle, CheckCircle, Volume2, VolumeX, Sparkles, X, Activity, FileText } from 'lucide-react';
+import { API_BASE } from '../../api/client';
 
 interface BriefData {
   patient_name: string;
@@ -40,7 +41,7 @@ export const DoctorBriefModal: React.FC<DoctorBriefModalProps> = ({
   const fetchBrief = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/doctor/brief/${patientId}`);
+      const res = await fetch(`${API_BASE}/doctor/brief/${patientId}`);
       if (res.ok) {
         const data = await res.json();
         setBrief(data);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Bot, Send, Sparkles, AlertTriangle, CheckCircle2, ChevronRight, X, ExternalLink, HelpCircle } from 'lucide-react';
+import { API_BASE } from '../../api/client';
 
 interface Citation {
   key: string;
@@ -62,7 +63,7 @@ export const DoctorCopilotDrawer: React.FC<DoctorCopilotDrawerProps> = ({
     setLoading(true);
 
     try {
-      const response = await fetch('/api/v1/doctor/copilot', {
+      const response = await fetch(`${API_BASE}/doctor/copilot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

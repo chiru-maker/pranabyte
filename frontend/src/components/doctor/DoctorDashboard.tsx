@@ -16,6 +16,7 @@ import {
   Save, Sparkles, AlertTriangle, ShieldCheck, Download,
   Bot, Clock, History, Printer, ExternalLink
 } from 'lucide-react';
+import { API_BASE } from '../../api/client';
 
 interface DoctorDashboardProps {
   patient: Patient;
@@ -56,7 +57,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
   };
 
   const handleOpenPrintableCaseSheet = () => {
-    window.open(`/api/v1/doctor/case-sheet-html/${patient.id}`, '_blank');
+    window.open(`${API_BASE}/doctor/case-sheet-html/${patient.id}`, '_blank');
   };
 
   return (
