@@ -112,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoadDemo, activeView, onNaviga
           </button>
         </nav>
 
-        {/* Right: Language Selector & Role Switcher */}
+        {/* Right: Language Selector & Demo Patient Button */}
         <div className="flex items-center gap-3">
           {/* Multilingual Selector */}
           <div className="flex items-center bg-parchment-200 border border-parchment-400 rounded-full px-2.5 py-1 text-xs">
@@ -136,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoadDemo, activeView, onNaviga
               onClick={onLoadDemo}
               className="hidden sm:inline-flex btn-secondary-paper text-xs px-3.5 py-1.5 font-semibold"
             >
-              <span>Demo Case (Rahul K.)</span>
+              <span>Demo Patient</span>
             </button>
           )}
         </div>

@@ -12,9 +12,9 @@ def seed_database():
     db = SessionLocal()
 
     # Check if already seeded
-    existing_patient = db.query(Patient).filter(Patient.name == "Rahul Kumar").first()
+    existing_patient = db.query(Patient).filter(Patient.name == "Demo Patient").first()
     if existing_patient:
-        print("Database already seeded with demo patient Rahul Kumar.")
+        print("Database already seeded with demo patient Demo Patient.")
         db.close()
         return
 
@@ -34,9 +34,9 @@ def seed_database():
         role="staff"
     )
     patient_user = User(
-        email="rahul.kumar@gmail.com",
+        email="demo.patient@example.com",
         hashed_password=get_password_hash("patient123"),
-        full_name="Rahul Kumar",
+        full_name="Demo Patient",
         role="patient"
     )
     db.add_all([doctor, staff, patient_user])
@@ -44,15 +44,15 @@ def seed_database():
     db.refresh(doctor)
     db.refresh(patient_user)
 
-    # 2. Create Demo Patient: Rahul Kumar
+    # 2. Create Demo Patient: Demo Patient
     patient = Patient(
         user_id=patient_user.id,
-        patient_id_display="PAT-2026-0891",
-        name="Rahul Kumar",
+        patient_id_display="PAT-DEMO-001",
+        name="Demo Patient",
         age=58,
         sex="Male",
-        phone="+91 98765 43210",
-        abha_id="91-8273-9912-0041",
+        phone="+91 90000 00001",
+        abha_id="91-0000-1111-2222",
         is_existing=True
     )
     db.add(patient)
@@ -83,7 +83,7 @@ def seed_database():
         ai_summary_draft="""### PATIENT CASE SUMMARY DRAFT
 *NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*
 
-**PATIENT:** Rahul Kumar | **AGE/SEX:** 58Y Male | **ID:** PAT-2026-0891 | **ABHA:** 91-8273-9912-0041
+**PATIENT:** Demo Patient | **AGE/SEX:** 58Y Male | **ID:** PAT-DEMO-001 | **ABHA:** 91-0000-1111-2222
 
 ---
 
@@ -354,12 +354,12 @@ Central retrosternal chest pain for 3 days, accompanied by intermittent breathle
             actor_name="Sister Ananya Rao (Staff)",
             actor_role="staff",
             action="PATIENT_REGISTRATION",
-            details="Registered patient Rahul Kumar (PAT-2026-0891) with ABHA 91-8273-9912-0041"
+            details="Registered patient Demo Patient (PAT-DEMO-001) with ABHA 91-0000-1111-2222"
         ),
         AuditLog(
             patient_id=patient.id,
             visit_id=visit.id,
-            actor_name="Rahul Kumar",
+            actor_name="Demo Patient",
             actor_role="patient",
             action="CONSENT_GIVEN",
             details="Accepted Consent v1.0.0 for structured AI intake"
@@ -401,7 +401,7 @@ Central retrosternal chest pain for 3 days, accompanied by intermittent breathle
 
     db.commit()
     db.close()
-    print("Demo data seeded successfully for Rahul Kumar (PAT-2026-0891)!")
+    print("Demo data seeded successfully for Demo Patient (PAT-DEMO-001)!")
 
 if __name__ == "__main__":
     seed_database()

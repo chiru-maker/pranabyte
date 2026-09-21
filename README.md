@@ -70,7 +70,7 @@ python -m venv venv
 # Install backend dependencies
 pip install -r backend/requirements.txt
 
-# Seed demo data (Rahul Kumar, 58M with full flagship case)
+# Seed demo data (Demo Patient, 58M with full flagship case)
 python backend/seed_data.py
 ```
 
@@ -104,7 +104,7 @@ Open your browser at: **http://localhost:3000**
 1. **Open http://localhost:3000**
 2. Click **"Load Flagship Demo"** in the top navigation bar.
 3. Observe:
-   - **Patient Header**: Rahul Kumar (58Y Male, ABHA: 91-8273-9912-0041).
+   - **Patient Header**: Demo Patient (58Y Male, ABHA: 91-0000-1111-2222).
    - **Red-Flag Alert**: Chest pain + Breathlessness detected.
    - **Contradiction Alert**: Prescription lists Aspirin 75mg active vs. Patient reports stopped 2 months ago.
    - **Completeness Gauge**: 85% with 12 redundant questions avoided.
@@ -137,7 +137,7 @@ pranabyte/
 │   │   │   └── audit.py          # Audit trail logger
 │   │   └── routers/              # Modular API endpoints
 │   ├── requirements.txt
-│   ├── seed_data.py              # Pre-seeded Rahul Kumar demo scenario
+│   ├── seed_data.py              # Pre-seeded Demo Patient scenario
 │   └── tests/                    # Automated pytest suite
 ├── frontend/
 │   ├── src/

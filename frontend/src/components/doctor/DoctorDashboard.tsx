@@ -89,7 +89,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
               <div className="flex flex-wrap items-center gap-3 text-xs text-ink-graphite mt-1.5 font-medium">
                 <span><strong>Patient ID:</strong> <span className="font-mono text-ink">{patient.patient_id_display}</span></span>
                 <span>•</span>
-                <span><strong>ABHA ID:</strong> <span className="font-mono text-terracotta font-semibold">{patient.abha_id || '91-8273-9912-0041'}</span></span>
+                <span><strong>ABHA ID:</strong> <span className="font-mono text-terracotta font-semibold">{patient.abha_id || '91-0000-1111-2222'}</span></span>
                 <span>•</span>
                 <span><strong>Visit Ref:</strong> <span className="font-mono text-ink">{visit.visit_number}</span></span>
                 <span>•</span>

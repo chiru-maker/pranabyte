@@ -22,7 +22,7 @@ export const DoctorBriefModal: React.FC<DoctorBriefModalProps> = ({
   const initialDraft = visit.ai_summary_draft || `### AI DOCTOR BRIEF DRAFT
 *NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*
 
-**PATIENT:** ${patient.name} | **AGE/SEX:** ${patient.age}Y ${patient.sex} | **ID:** ${patient.patient_id_display} | **ABHA:** ${patient.abha_id || '91-8273-9912-0041'}
+**PATIENT:** ${patient.name} | **AGE/SEX:** ${patient.age}Y ${patient.sex} | **ID:** ${patient.patient_id_display} | **ABHA:** ${patient.abha_id || '91-0000-1111-2222'}
 
 ---
 

@@ -34,7 +34,7 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({
           resourceType: "Patient",
           id: patient.id,
           identifier: [
-            { system: "https://healthid.ndhm.gov.in", value: patient.abha_id || "91-8273-9912-0041" },
+            { system: "https://healthid.ndhm.gov.in", value: patient.abha_id || "91-0000-1111-2222" },
             { system: "hospital:patient_id", value: patient.patient_id_display }
           ],
           name: [{ text: patient.name, family: patient.name.split(' ').slice(1).join(' '), given: [patient.name.split(' ')[0]] }],

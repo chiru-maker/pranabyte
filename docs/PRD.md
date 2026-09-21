@@ -23,7 +23,7 @@ Traditional outpatient clinical intake suffers from three critical systemic bott
 | Persona | Role | Core Goals | Pain Points Addressed |
 | :--- | :--- | :--- | :--- |
 | **Dr. Priya Sharma** | Senior Consultant Physician | Rapidly grasp patient context, review red flags, reconcile medications, finalize case notes in <60 seconds. | Drowning in repetitive typing, fragmented physical paper records, missing critical contraindications. |
-| **Rahul Kumar** | Patient (58Y Male, Chronic CAD/T2D) | Communicate symptoms naturally in native language without filling complex digital forms. | Intimidated by complex medical jargon, struggles with small digital text, repeats past history repeatedly. |
+| **Demo Patient** | Patient (58Y Male, Chronic CAD/T2D) | Communicate symptoms naturally in native language without filling complex digital forms. | Intimidated by complex medical jargon, struggles with small digital text, repeats past history repeatedly. |
 | **Sister Ananya Rao** | Hospital Triage Nurse / Front Desk Staff | Queue patients, capture vitals, upload prior physical discharge summaries & prescriptions for OCR ingestion. | Manual data entry backlogs, lost paper prescriptions, incomplete triage history. |
 | **Rajesh V.** | Hospital IT & Compliance Admin | Monitor audit logs, manage role-based access control (RBAC), ensure data isolation, track system performance. | Security vulnerabilities, unverified AI claims, lack of traceable audit trails. |
 

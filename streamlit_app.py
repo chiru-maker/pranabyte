@@ -117,7 +117,7 @@ if "copilot_messages" not in st.session_state:
     st.session_state.copilot_messages = [
         {
             "role": "ai",
-            "content": "Hello Dr. Priya! I am your Clinical Intelligence Copilot for Rahul Kumar (58M). Ask me anything regarding active medications, allergies, contradictions, or timeline citations.",
+            "content": "Hello Dr. Priya! I am your Clinical Intelligence Copilot for Demo Patient (58M). Ask me anything regarding active medications, allergies, contradictions, or timeline citations.",
             "citations": []
         }
     ]
@@ -154,14 +154,14 @@ with st.sidebar:
     st.divider()
     
     # 1-Click Flagship Demo Reset
-    if st.button("✨ Reset to Flagship Demo (Rahul Kumar)", use_container_width=True):
+    if st.button("✨ Reset to Flagship Demo (Demo Patient)", use_container_width=True):
         st.session_state.aspirin_resolved = False
         st.session_state.red_flag_ack = False
         st.session_state.role = "doctor"
         st.session_state.copilot_messages = [
             {
                 "role": "ai",
-                "content": "Hello Dr. Priya! I am your Clinical Intelligence Copilot for Rahul Kumar (58M). Ask me anything regarding active medications, allergies, contradictions, or timeline citations.",
+                "content": "Hello Dr. Priya! I am your Clinical Intelligence Copilot for Demo Patient (58M). Ask me anything regarding active medications, allergies, contradictions, or timeline citations.",
                 "citations": []
             }
         ]
@@ -169,14 +169,14 @@ with st.sidebar:
 
     st.info("💡 **Core USP**:\n- 🧠 Ask Less, Know More (Context Engine)\n- 🔗 Evidence-Linked Facts (4 States)\n- ⚠️ Contradiction & Red-Flag Cluster\n- 🤖 Clinical AI Copilot & 30s Brief\n- 🌐 HL7 FHIR R4 Ready")
 
-# Flagship Patient: Rahul Kumar (58M)
+# Flagship Patient: Demo Patient (58M)
 patient_data = {
-    "name": "Rahul Kumar",
+    "name": "Demo Patient",
     "age": 58,
     "sex": "Male",
-    "id": "PAT-2026-0891",
-    "abha": "91-8273-9912-0041",
-    "phone": "+91 98765 43210",
+    "id": "PAT-DEMO-001",
+    "abha": "91-0000-1111-2222",
+    "phone": "+91 90000 00001",
     "visit": "VISIT-2026-904",
     "date": "21-Sep-2026",
     "complaint": "Central chest pain for 3 days with intermittent breathlessness on mild exertion."
@@ -340,7 +340,7 @@ elif st.session_state.role == "doctor":
     with doc_tab1:
         st.markdown("""
         <div class="brief-card">
-            <h3 style="color:#38bdf8; margin-top:0;">⚡ 30-Second Doctor Brief &mdash; Rahul Kumar (58M)</h3>
+            <h3 style="color:#38bdf8; margin-top:0;">⚡ 30-Second Doctor Brief &mdash; Demo Patient (58M)</h3>
             <p style="font-size:15px; font-weight:600; color:#f8fafc;">
                 58-year-old male with history of T2DM & HTN presenting with 3-day retrosternal chest pain and breathlessness. ⚠️ 1 High-Priority Cardiopulmonary Red Flag Active.
             </p>
@@ -461,7 +461,7 @@ elif st.session_state.role == "doctor":
                 cits = [{"key": "Voice vs Rx", "value": "Aspirin Active vs Stopped 2 Mo Ago", "citation": "Contradiction Engine"}]
             else:
                 ans = f"**Clinical Overview for {patient_data['name']}**:\n\n• Presenting with central chest pain for 3 days and exertional dyspnea.\n• Known Type 2 Diabetes Mellitus (2024) and Essential Hypertension (2025).\n• 1 active red flag alert (cardiopulmonary symptom cluster).\n• 1 active medication discrepancy (Aspirin cessation)."
-                cits = [{"key": "Case Summary", "value": "Rahul Kumar 58M", "citation": "EHR Master File"}]
+                cits = [{"key": "Case Summary", "value": "Demo Patient 58M", "citation": "EHR Master File"}]
 
             st.session_state.copilot_messages.append({"role": "ai", "content": ans, "citations": cits})
             st.rerun()
@@ -471,7 +471,7 @@ elif st.session_state.role == "doctor":
         st.caption("Live trace of intake pipeline from patient check-in to clinician verification.")
 
         steps = [
-            ("1. Registration & Consent", "ABHA 91-8273-9912-0041 linked. Consent v1.0.0 accepted.", "COMPLETED", "09:15 AM"),
+            ("1. Registration & Consent", "ABHA 91-0000-1111-2222 linked. Consent v1.0.0 accepted.", "COMPLETED", "09:15 AM"),
             ("2. Multimodal Intake", "Hindi/English voice recorded. Apollo Rx OCR parsed at 98% confidence.", "COMPLETED", "09:18 AM"),
             ("3. Evidence Linking", "8 clinical facts tagged with 🟢 CONFIRMED, 🔵 DOCUMENTED, or 🟡 UNCERTAIN states.", "COMPLETED", "09:19 AM"),
             ("4. Safety & Conflict Scan", "Cardiopulmonary red-flag & Aspirin stoppage discrepancy flagged.", "COMPLETED", "09:20 AM"),
@@ -635,13 +635,13 @@ else:
     st.subheader("Active Patient Triage Queue")
     
     queue_data = [
-        {"Name": "Rahul Kumar", "Age/Sex": "58 M", "Status": "🚨 RED FLAG ALERT", "Complaint": "Chest pain + Breathlessness for 3 days", "Time": "10:42 AM"},
+        {"Name": "Demo Patient", "Age/Sex": "58 M", "Status": "🚨 RED FLAG ALERT", "Complaint": "Chest pain + Breathlessness for 3 days", "Time": "10:42 AM"},
         {"Name": "Meenakshi Sundaram", "Age/Sex": "64 F", "Status": "Ready for Doctor", "Complaint": "Diabetic Retinopathy follow-up", "Time": "10:50 AM"},
         {"Name": "Siddharth Varma", "Age/Sex": "34 M", "Status": "Requires Verification", "Complaint": "Uncertain allergy declaration", "Time": "11:05 AM"},
         {"Name": "Kavita Joshi", "Age/Sex": "49 F", "Status": "Waiting Intake", "Complaint": "Hypertension checkup", "Time": "11:15 AM"}
     ]
     st.table(queue_data)
     
-    if st.button("Open Rahul Kumar (Flagship Case) in Doctor Portal", type="primary"):
+    if st.button("Open Demo Patient (Flagship Case) in Doctor Portal", type="primary"):
         st.session_state.role = "doctor"
         st.rerun()

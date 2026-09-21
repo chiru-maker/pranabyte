@@ -141,7 +141,7 @@ class OCRService:
            APOLLO MULTISPECIALITY HOSPITALS
      154/11 Bannerghatta Road, Bengaluru, Karnataka
 ============================================================
-Patient: Rahul Kumar | Age/Sex: 58Y / M | Date: 14-Aug-2026
+Patient: Demo Patient | Age/Sex: 58Y / M | Date: 14-Aug-2026
 UHID: APO-892341 | Dept: Cardiology & Internal Medicine
 
 DIAGNOSIS:

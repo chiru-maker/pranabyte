@@ -32,18 +32,18 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
     setTimeout(() => {
       const newPatient: Patient = {
         id: `pat_${Date.now()}`,
-        patient_id_display: `PAT-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        patient_id_display: `PAT-DEMO-${Math.floor(100 + Math.random() * 900)}`,
         name: name.trim(),
         age: parseInt(age, 10),
         sex,
         phone: phone.trim(),
-        abha_id: abhaId.trim() || undefined,
+        abha_id: abhaId.trim() || `91-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-0001`,
         is_existing: false,
         created_at: new Date().toISOString()
       };
       setIsSubmitting(false);
       onPatientCreated(newPatient);
-    }, 400);
+    }, 300);
   };
 
   return (
@@ -57,22 +57,22 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
           Patient Registration
         </h2>
         <p className="text-xs sm:text-sm text-ink-charcoal">
-          Enter patient demographic details or select the verified demo patient case.
+          Enter patient details to begin a new clinical intake session.
         </p>
       </div>
 
       {/* Quick Demo Case Selector */}
       <div className="p-4 rounded-2xl bg-parchment border border-parchment-400 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-0.5">
-          <span className="text-xs font-bold text-ink block">Use Sample Patient (Rahul Kumar, 58Y)</span>
-          <span className="text-[11px] text-ink-graphite block">Preloaded CAD / T2D history with active medication conflict</span>
+          <span className="text-xs font-bold text-ink block">Quick Start: Standard Demo Case</span>
+          <span className="text-[11px] text-ink-graphite block">Simulates a patient consultation with prior documented records</span>
         </div>
         <button
           type="button"
           onClick={onSelectDemoPatient}
           className="btn-terracotta text-xs px-4 py-2"
         >
-          <span>Load Rahul Kumar</span>
+          <span>Load Demo Case</span>
         </button>
       </div>
 
@@ -85,7 +85,7 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
         <div>
           <label htmlFor="reg-name" className="block text-ink font-semibold mb-1">
-            Full Legal Name *
+            Patient Name *
           </label>
           <div className="relative">
             <User className="w-4 h-4 absolute left-3.5 top-3 text-ink-graphite" />
@@ -95,7 +95,7 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Rahul Kumar"
+              placeholder="e.g. Jane Doe"
               className="w-full pl-10 pr-4 py-2.5 bg-parchment border border-parchment-400 rounded-full text-ink text-xs focus:outline-none focus:border-terracotta"
             />
           </div>
@@ -116,7 +116,7 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
                 required
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                placeholder="58"
+                placeholder="45"
                 className="w-full pl-10 pr-4 py-2.5 bg-parchment border border-parchment-400 rounded-full text-ink text-xs focus:outline-none focus:border-terracotta"
               />
             </div>
@@ -141,7 +141,7 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
 
         <div>
           <label htmlFor="reg-phone" className="block text-ink font-semibold mb-1">
-            Mobile Phone Number *
+            Contact Number *
           </label>
           <div className="relative">
             <Phone className="w-4 h-4 absolute left-3.5 top-3 text-ink-graphite" />
@@ -151,7 +151,7 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 98765 43210"
+              placeholder="+91 90000 00000"
               className="w-full pl-10 pr-4 py-2.5 bg-parchment border border-parchment-400 rounded-full text-ink text-xs focus:outline-none focus:border-terracotta"
             />
           </div>
@@ -159,7 +159,7 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
 
         <div>
           <label htmlFor="reg-abha" className="block text-ink font-semibold mb-1">
-            Ayushman Bharat Health Account (ABHA ID) <span className="text-ink-graphite font-normal">(Optional)</span>
+            ABHA Health ID <span className="text-ink-graphite font-normal">(Optional)</span>
           </label>
           <div className="relative">
             <Heart className="w-4 h-4 absolute left-3.5 top-3 text-terracotta" />
@@ -168,7 +168,7 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
               type="text"
               value={abhaId}
               onChange={(e) => setAbhaId(e.target.value)}
-              placeholder="e.g. 91-8273-9912-0041"
+              placeholder="e.g. 91-0000-0000-0001"
               className="w-full pl-10 pr-4 py-2.5 bg-parchment border border-parchment-400 rounded-full text-ink text-xs focus:outline-none focus:border-terracotta font-mono"
             />
           </div>

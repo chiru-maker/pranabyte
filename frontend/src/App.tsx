@@ -7,7 +7,7 @@ import { NotFoundPage } from './components/public/NotFoundPage';
 import { PrivacyPolicyPage } from './components/public/PrivacyPolicyPage';
 import { PatientRegistration } from './components/patient/PatientRegistration';
 import { ConsentScreen } from './components/patient/ConsentScreen';
-import { CaseTakingVoice } from './components/patient/CaseTakingVoice';
+import { CaseTakingVoice, VoiceAnswerRecord } from './components/patient/CaseTakingVoice';
 import { AdaptiveQuestionnaire } from './components/patient/AdaptiveQuestionnaire';
 import { DocumentUpload } from './components/patient/DocumentUpload';
 import { PatientCorrectionScreen } from './components/patient/PatientCorrectionScreen';
@@ -27,29 +27,56 @@ function MainApp() {
   const [patientStep, setPatientStep] = useState<number>(1);
   const [loadingVoice, setLoadingVoice] = useState(false);
 
-  // Active Patient Data
+  // Dynamic Patient State
   const [currentPatient, setCurrentPatient] = useState<Patient>({
-    id: 'pat_rahul_01',
-    patient_id_display: 'PAT-2026-0891',
-    name: 'Rahul Kumar',
-    age: 58,
+    id: 'pat_demo_01',
+    patient_id_display: 'PAT-DEMO-001',
+    name: 'Demo Patient',
+    age: 52,
     sex: 'Male',
-    phone: '+91 98765 43210',
-    abha_id: '91-8273-9912-0041',
+    phone: '+91 90000 00001',
+    abha_id: '91-0000-1111-2222',
     is_existing: true,
     created_at: new Date().toISOString()
   });
 
   const [currentVisit, setCurrentVisit] = useState<Visit>({
     id: 'visit_901',
-    patient_id: 'pat_rahul_01',
+    patient_id: 'pat_demo_01',
     visit_number: 'VISIT-2026-904',
-    chief_complaint: 'Chest pain for three days with intermittent breathlessness',
+    chief_complaint: 'Central chest discomfort with intermittent breathlessness',
     status: 'waiting_doctor',
     completeness_score: 85,
-    questions_asked_count: 3,
+    questions_asked_count: 5,
     questions_avoided_count: 12,
-    ai_summary_draft: `### PATIENT CASE SUMMARY DRAFT\n*NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*\n\n**PATIENT:** Rahul Kumar | **AGE/SEX:** 58Y Male | **ID:** PAT-2026-0891 | **ABHA:** 91-8273-9912-0041\n\n---\n\n**1. CHIEF COMPLAINT:**\nCentral retrosternal chest pain for 3 days, accompanied by intermittent breathlessness on mild exertion.\n\n**2. CURRENT HISTORY & SYMPTOMS:**\n- Chest Pain: Moderate-Severe, onset 3 days ago, intermittent pressure.\n- Dyspnea / Breathlessness: Present on exertion. Pain does not radiate to left arm.\n\n**3. PAST MEDICAL HISTORY:**\n- Type 2 Diabetes Mellitus [DOCUMENTED - Apollo Hospital 2024]\n- Essential Hypertension [DOCUMENTED - Apollo Hospital 2025]\n\n**4. MEDICATIONS & ADHERENCE:**\n- Tab. Metformin 500mg BD [DOCUMENTED - Active]\n- Tab. Amlodipine 5mg OD [DOCUMENTED - Active]\n- Tab. Ecosprin 75mg OD [🚨 CONFLICT: Documented Active vs Patient reports stopped 2 months ago]\n\n**5. ALLERGIES:**\n- Penicillin [DOCUMENTED - Severe cutaneous hypersensitivity]\n\n**6. SAFETY RED FLAGS & RECONCILIATION:**\n- 🚨 Acute Chest Pain + Breathlessness cluster detected in diabetic patient with recent aspirin cessation. Immediate 12-lead ECG recommended.`,
+    ai_summary_draft: `### PATIENT CASE SUMMARY DRAFT
+*NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*
+
+**PATIENT:** Demo Patient | **AGE/SEX:** 52Y Male | **ID:** PAT-DEMO-001 | **ABHA:** 91-0000-1111-2222
+
+---
+
+**1. CHIEF COMPLAINT:**
+Central retrosternal chest discomfort for 3 days, accompanied by intermittent breathlessness on mild exertion.
+
+**2. CURRENT HISTORY & SYMPTOMS:**
+- Chest Pain: Moderate-Severe, onset 3 days ago, intermittent pressure.
+- Dyspnea / Breathlessness: Present on exertion. No radiation to left arm.
+
+**3. PAST MEDICAL HISTORY:**
+- Type 2 Diabetes Mellitus [DOCUMENTED - Prior Medical Record]
+- Essential Hypertension [DOCUMENTED - Prior Medical Record]
+
+**4. MEDICATIONS & ADHERENCE:**
+- Tab. Metformin 500mg BD [DOCUMENTED - Active]
+- Tab. Amlodipine 5mg OD [DOCUMENTED - Active]
+- Tab. Ecosprin 75mg OD [🚨 CONFLICT: Documented Active vs Patient reports stopped 2 months ago]
+
+**5. ALLERGIES:**
+- Penicillin [DOCUMENTED - Severe cutaneous hypersensitivity]
+
+**6. SAFETY RED FLAGS & RECONCILIATION:**
+- 🚨 Acute Chest Pain + Breathlessness cluster detected in diabetic patient with recent aspirin cessation. Immediate 12-lead ECG recommended.`,
     doctor_notes: '',
     doctor_verified: false,
     patient_confirmed: true,
@@ -61,7 +88,7 @@ function MainApp() {
   const [facts, setFacts] = useState<ClinicalFact[]>([
     {
       id: 'f1',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'chief_complaint',
       key_name: 'Chief Complaint',
       value: 'Central chest pain for 3 days with breathlessness',
@@ -73,10 +100,10 @@ function MainApp() {
     },
     {
       id: 'f2',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'symptom',
       key_name: 'Chest Pain Duration & Severity',
-      value: 'Moderate to severe substernal pressure, onset 18-Sep-2026',
+      value: 'Moderate to severe substernal pressure, onset 3 days ago',
       status: 'CONFIRMED',
       source_citation: "Voice Transcript: 'Chest pain for three days'",
       confidence: 0.96,
@@ -85,7 +112,7 @@ function MainApp() {
     },
     {
       id: 'f3',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'symptom',
       key_name: 'Exertional Dyspnea',
       value: 'Intermittent breathlessness on mild exertion (climbing stairs)',
@@ -97,72 +124,72 @@ function MainApp() {
     },
     {
       id: 'f4',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'past_history',
       key_name: 'Type 2 Diabetes Mellitus',
-      value: 'Diagnosed 2024, on oral hypoglycemics (Metformin)',
+      value: 'Diagnosed in prior health records, on oral hypoglycemics (Metformin)',
       status: 'DOCUMENTED',
-      source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
+      source_citation: 'Prior Hospital Record',
       confidence: 0.99,
       doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
       id: 'f5',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'past_history',
       key_name: 'Essential Hypertension',
       value: 'Stage 1 Hypertension, on Amlodipine 5mg',
       status: 'DOCUMENTED',
-      source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
+      source_citation: 'Prior Hospital Record',
       confidence: 0.97,
       doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
       id: 'f6',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'allergy',
       key_name: 'Penicillin Allergy',
       value: 'Severe cutaneous hypersensitivity / rash',
       status: 'DOCUMENTED',
-      source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
+      source_citation: 'Prior Medical Record',
       confidence: 0.98,
       doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
       id: 'f7',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'medication',
       key_name: 'Metformin 500mg',
       value: '1 tab twice daily after food [Active]',
       status: 'DOCUMENTED',
-      source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
+      source_citation: 'Prior Prescription',
       confidence: 0.98,
       doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
       id: 'f8',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'medication',
       key_name: 'Amlodipine Dosage',
       value: 'Tab. Amlodipine 5mg (Morning) — Clear prescription entry',
       status: 'DOCUMENTED',
-      source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
+      source_citation: 'Prior Prescription',
       confidence: 0.96,
       doctor_verified: false,
       created_at: new Date().toISOString()
     },
     {
       id: 'f9',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'medication',
       key_name: 'Aspirin (Ecosprin 75mg) Discrepancy',
       value: 'Prescription lists Ecosprin 75mg ACTIVE vs Patient reports STOPPED 2 months ago',
       status: 'CONFLICTING',
-      source_citation: 'Discrepancy: Apollo Rx (14-Aug-2026) vs Spoken Intake (21-Sep-2026)',
+      source_citation: 'Discrepancy: Prescription Record vs Spoken Statement',
       confidence: 0.95,
       doctor_verified: false,
       created_at: new Date().toISOString()
@@ -172,12 +199,12 @@ function MainApp() {
   const [contradictions, setContradictions] = useState<Contradiction[]>([
     {
       id: 'c1',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       category: 'medication_conflict',
       title: 'Medication Discrepancy: Aspirin (Ecosprin) 75mg',
-      source_a_description: 'Apollo Hospital Prescription (14-Aug-2026)',
+      source_a_description: 'Prior Hospital Prescription',
       source_a_value: 'Tab. Ecosprin 75mg OD — Active Daily',
-      source_b_description: 'Patient Spoken Intake (21-Sep-2026)',
+      source_b_description: 'Patient Spoken Intake',
       source_b_value: "Patient stated: 'I stopped taking aspirin two months ago.'",
       status: 'ACTIVE',
       created_at: new Date().toISOString()
@@ -187,11 +214,11 @@ function MainApp() {
   const [redFlags, setRedFlags] = useState<RedFlag[]>([
     {
       id: 'rf1',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       rule_name: 'acute_coronary_cluster',
       severity: 'HIGH',
       title: 'Cardiopulmonary Red Flag: Chest Pain + Breathlessness',
-      trigger_criteria: 'Substernal chest discomfort for 3 days with concurrent dyspnea in a known diabetic/hypertensive patient with recent aspirin discontinuation.',
+      trigger_criteria: 'Substernal chest discomfort with concurrent dyspnea in a diabetic/hypertensive patient with recent aspirin discontinuation.',
       recommendation: 'Urgent clinician review and 12-lead ECG evaluation recommended.',
       status: 'UNACKNOWLEDGED',
       created_at: new Date().toISOString()
@@ -201,10 +228,10 @@ function MainApp() {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([
     {
       id: 't1',
-      patient_id: 'pat_rahul_01',
-      event_date: '2024',
+      patient_id: 'pat_demo_01',
+      event_date: '2 Years Ago',
       event_title: 'Type 2 Diabetes Documented',
-      event_description: 'Diagnosed at Apollo Clinic. Started on Metformin 500mg.',
+      event_description: 'Diagnosed at clinic. Started on Metformin 500mg.',
       source_type: 'prior_record',
       status: 'DOCUMENTED',
       confidence: 0.98,
@@ -213,8 +240,8 @@ function MainApp() {
     },
     {
       id: 't2',
-      patient_id: 'pat_rahul_01',
-      event_date: '2025',
+      patient_id: 'pat_demo_01',
+      event_date: '1 Year Ago',
       event_title: 'Hypertension & Daily Aspirin Started',
       event_description: 'BP 148/94. Initiated on Amlodipine 5mg and Aspirin 75mg.',
       source_type: 'prior_record',
@@ -225,10 +252,10 @@ function MainApp() {
     },
     {
       id: 't3',
-      patient_id: 'pat_rahul_01',
-      event_date: '14-Aug-2026',
-      event_title: 'Prescription Uploaded',
-      event_description: 'Apollo Cardiology OPD record. Metformin, Aspirin, Amlodipine active.',
+      patient_id: 'pat_demo_01',
+      event_date: '1 Month Ago',
+      event_title: 'Prescription Record Ingested',
+      event_description: 'Cardiology OPD record. Metformin, Aspirin, Amlodipine active.',
       source_type: 'prescription',
       status: 'DOCUMENTED',
       confidence: 0.99,
@@ -237,8 +264,8 @@ function MainApp() {
     },
     {
       id: 't4',
-      patient_id: 'pat_rahul_01',
-      event_date: 'July 2026 (~2 Months Ago)',
+      patient_id: 'pat_demo_01',
+      event_date: '2 Months Ago',
       event_title: 'Patient Stopped Aspirin',
       event_description: 'Self-reported stoppage due to mild gastric irritation without physician consult.',
       source_type: 'voice_intake',
@@ -249,8 +276,8 @@ function MainApp() {
     },
     {
       id: 't5',
-      patient_id: 'pat_rahul_01',
-      event_date: '18-Sep-2026 (3 Days Ago)',
+      patient_id: 'pat_demo_01',
+      event_date: '3 Days Ago',
       event_title: 'Chest Pain & Breathlessness Onset',
       event_description: 'Substernal chest pain and shortness of breath on exertion.',
       source_type: 'voice_intake',
@@ -261,9 +288,9 @@ function MainApp() {
     },
     {
       id: 't6',
-      patient_id: 'pat_rahul_01',
-      event_date: 'Today (21-Sep-2026)',
-      event_title: 'Current Consultation & Smart Intake',
+      patient_id: 'pat_demo_01',
+      event_date: 'Today',
+      event_title: 'Current Consultation & Voice Intake',
       event_description: 'Voice case taking completed. 12 questions avoided using known history. Red flags active.',
       source_type: 'doctor_note',
       status: 'CONFIRMED',
@@ -283,11 +310,39 @@ function MainApp() {
     "✓ 'Do you have known drug allergies?' streamlined — Documented Penicillin allergy found"
   ];
 
-  const handleVoiceProcess = (transcript: string) => {
+  // Process Real Voice Answers from CaseTakingVoice
+  const handleVoiceProcess = (answers: VoiceAnswerRecord[], combinedTranscript: string) => {
     setLoadingVoice(true);
+
     setTimeout(() => {
+      // Dynamically extract new clinical facts from the patient's answers
+      const newExtractedFacts: ClinicalFact[] = answers.map((ans, idx) => ({
+        id: `fact_voice_${Date.now()}_${idx}`,
+        patient_id: currentPatient.id,
+        category: (ans.category === 'chief_complaint' ? 'chief_complaint' : ans.category === 'medications' ? 'medication' : ans.category === 'allergies' ? 'allergy' : 'symptom') as any,
+        key_name: ans.question.split('?')[0].replace(/^What is your |When did this |Do you have any /, '').slice(0, 35),
+        value: ans.patient_response,
+        status: 'CONFIRMED',
+        source_citation: `Patient Voice Statement: "${ans.patient_response}"`,
+        confidence: 0.98,
+        doctor_verified: false,
+        created_at: new Date().toISOString()
+      }));
+
+      // Merge newly extracted facts with existing facts
+      if (newExtractedFacts.length > 0) {
+        setFacts((prev) => [...newExtractedFacts, ...prev.filter(f => f.status === 'DOCUMENTED')]);
+      }
+
+      // Update visit draft summary with real combined transcript
+      setCurrentVisit((prev) => ({
+        ...prev,
+        chief_complaint: answers.find(a => a.category === 'chief_complaint')?.patient_response || prev.chief_complaint,
+        ai_summary_draft: `### PATIENT CASE SUMMARY (VOICE INTAKE)\n*NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*\n\n**PATIENT:** ${currentPatient.name} | **AGE/SEX:** ${currentPatient.age}Y ${currentPatient.sex} | **ID:** ${currentPatient.patient_id_display}\n\n---\n\n**1. RECORDED PATIENT STATEMENTS:**\n${answers.map(a => `• **${a.question}:** ${a.patient_response}`).join('\n')}\n\n**2. CLINICAL RECONCILIATION & SAFETY:**\n- Safety Red Flags: Acute symptom review recommended.\n- Verification Status: Awaiting physician review.`
+      }));
+
       setLoadingVoice(false);
-      setPatientStep(4);
+      setPatientStep(4); // Move to Adaptive Q&A
     }, 600);
   };
 

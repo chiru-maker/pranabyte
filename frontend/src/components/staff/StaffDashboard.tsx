@@ -15,34 +15,34 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
 
   const [queuePatients] = useState<Patient[]>([
     {
-      id: 'pat_rahul_01',
-      patient_id_display: 'PAT-2026-0891',
-      name: 'Rahul Kumar',
+      id: 'pat_demo_01',
+      patient_id_display: 'PAT-DEMO-001',
+      name: 'Demo Patient',
       age: 58,
       sex: 'Male',
-      phone: '+91 98765 43210',
-      abha_id: '91-8273-9912-0041',
+      phone: '+91 90000 00001',
+      abha_id: '91-0000-1111-2222',
       is_existing: true,
       created_at: new Date().toISOString()
     },
     {
       id: 'pat_sunita_02',
-      patient_id_display: 'PAT-2026-0892',
+      patient_id_display: 'PAT-DEMO-002',
       name: 'Sunita Devi',
       age: 46,
       sex: 'Female',
-      phone: '+91 94512 88321',
+      phone: '+91 90000 00002',
       abha_id: '91-4412-3321-9988',
       is_existing: true,
       created_at: new Date().toISOString()
     },
     {
       id: 'pat_manjunath_03',
-      patient_id_display: 'PAT-2026-0893',
+      patient_id_display: 'PAT-DEMO-003',
       name: 'Manjunath Gowda',
       age: 62,
       sex: 'Male',
-      phone: '+91 98450 11223',
+      phone: '+91 90000 00003',
       abha_id: '91-6677-8899-0011',
       is_existing: false,
       created_at: new Date().toISOString()
@@ -97,7 +97,7 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
         <div className="paper-card p-5 space-y-1">
           <span className="text-xs font-semibold text-ink-graphite">OCR Prescription Ingestion</span>
           <p className="text-2xl font-serif font-bold text-ink">98.4% Accuracy</p>
-          <span className="text-[11px] text-[#1e40af] font-medium">Apollo & Manipal Rx Presets</span>
+          <span className="text-[11px] text-[#1e40af] font-medium">Verified Prescription Ingestion</span>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
                   <td className="p-3 font-bold text-ink">{pat.name}</td>
                   <td className="p-3 font-mono text-ink-graphite">
                     <div>{pat.patient_id_display}</div>
-                    <div className="text-[10px] text-terracotta">{pat.abha_id || '91-8273-9912-0041'}</div>
+                    <div className="text-[10px] text-terracotta">{pat.abha_id || '91-0000-1111-2222'}</div>
                   </td>
                   <td className="p-3 text-ink-charcoal">{pat.age}Y, {pat.sex}</td>
                   <td className="p-3 font-mono text-ink-graphite">{pat.phone}</td>

@@ -50,7 +50,7 @@ System accounts and authentication.
 Core patient demographic & identity profile.
 - `id` (VARCHAR(64), PK): Unique UUID
 - `user_id` (VARCHAR(64), FK -> users.id, NULLABLE): Optional patient account link
-- `patient_id_display` (VARCHAR(32), UNIQUE, INDEX): e.g. `PAT-2026-0891`
+- `patient_id_display` (VARCHAR(32), UNIQUE, INDEX): e.g. `PAT-DEMO-001`
 - `name` (VARCHAR(255), NOT NULL): Full legal name
 - `age` (INTEGER, NOT NULL): Age in years
 - `sex` (VARCHAR(16), NOT NULL): `Male`, `Female`, `Other`

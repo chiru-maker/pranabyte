@@ -73,7 +73,7 @@ def test_red_flag_detection():
 
 def test_ocr_extraction():
     """Verify mock OCR parsing extracts medications, allergies, and diagnoses."""
-    sample_text = "Patient: Rahul Kumar | Diagnosis: Type 2 Diabetes | Rx: Metformin 500mg, Ecosprin 75mg | Allergy: Penicillin"
+    sample_text = "Patient: Demo Patient | Diagnosis: Type 2 Diabetes | Rx: Metformin 500mg, Ecosprin 75mg | Allergy: Penicillin"
     entities = ocr_service._extract_clinical_entities(sample_text)
     types = [e["entity_type"] for e in entities]
     assert "medication" in types

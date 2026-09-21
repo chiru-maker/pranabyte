@@ -17,7 +17,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [mockAuditLogs] = useState<AuditLog[]>([
     {
       id: 'aud_101',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       visit_id: 'visit_901',
       actor_name: 'Dr. Priya Sharma',
       actor_role: 'doctor',
@@ -27,7 +27,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     },
     {
       id: 'aud_102',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       visit_id: 'visit_901',
       actor_name: 'Sister Ananya Rao',
       actor_role: 'nurse',
@@ -37,9 +37,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     },
     {
       id: 'aud_103',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       visit_id: 'visit_901',
-      actor_name: 'Rahul Kumar',
+      actor_name: 'Demo Patient',
       actor_role: 'patient',
       action: 'CONSENT_GRANTED',
       details: 'Granted AI Voice Intake & Data Processing Consent v1.0.0',
@@ -47,7 +47,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     },
     {
       id: 'aud_104',
-      patient_id: 'pat_rahul_01',
+      patient_id: 'pat_demo_01',
       visit_id: 'visit_901',
       actor_name: 'AI Extraction Engine',
       actor_role: 'ai_system',
@@ -60,8 +60,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const usersList = [
     { name: 'Dr. Priya Sharma', role: 'Doctor / Physician', email: 'priya.sharma@hospital.org', status: 'Active' },
     { name: 'Sister Ananya Rao', role: 'Staff Nurse / Triage', email: 'ananya.rao@hospital.org', status: 'Active' },
-    { name: 'Rahul Kumar', role: 'Patient (Self-Service)', email: 'rahul.kumar@gmail.com', status: 'Active' },
-    { name: 'Rajesh V.', role: 'System Administrator', email: 'rajesh.admin@pranabyte.health', status: 'Active' },
+    { name: 'Demo Patient', role: 'Patient (Self-Service)', email: 'demo.patient@example.com', status: 'Active' },
+    { name: 'Rajesh V.', role: 'System Administrator', email: 'admin@pranabyte.health', status: 'Active' },
   ];
 
   const filteredLogs = mockAuditLogs.filter(log => {

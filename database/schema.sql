@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS patients (
     id VARCHAR(64) PRIMARY KEY,
     user_id VARCHAR(64) REFERENCES users(id),
-    patient_id_display VARCHAR(32) UNIQUE NOT NULL, -- e.g. PAT-2026-0891
+    patient_id_display VARCHAR(32) UNIQUE NOT NULL, -- e.g. PAT-DEMO-001
     name VARCHAR(255) NOT NULL,
     age INTEGER NOT NULL,
     sex VARCHAR(16) NOT NULL,

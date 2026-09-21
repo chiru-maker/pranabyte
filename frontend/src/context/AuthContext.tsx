@@ -47,16 +47,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else if (newRole === 'admin') {
       setUser({
         id: 'usr_adm_01',
-        email: 'rajesh.admin@pranabyte.health',
+        email: 'admin@pranabyte.health',
         full_name: 'Rajesh V. (Compliance Admin)',
         role: 'admin',
         is_active: true
       });
     } else {
       setUser({
-        id: 'usr_pat_01',
-        email: 'rahul.kumar@gmail.com',
-        full_name: 'Rahul Kumar',
+        id: 'usr_demo_pat_01',
+        email: 'demo.patient@example.com',
+        full_name: 'Demo Patient',
         role: 'patient',
         is_active: true
       });
