@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Patient } from '../../types';
 import { User, Phone, Calendar, CreditCard, ArrowRight, Sparkles } from 'lucide-react';
+import { SpeechToText } from '../SpeechToText';
 
 interface PatientRegistrationProps {
   onPatientCreated: (patient: Patient) => void;
@@ -65,16 +66,25 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
           <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
             Full Name *
           </label>
-          <div className="relative">
-            <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+          <div className="relative flex items-center">
+            <User className="w-4 h-4 text-slate-500 absolute left-3.5" />
             <input
               type="text"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g. Rahul Kumar"
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500 transition"
+              className="w-full pl-10 pr-11 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500 transition"
             />
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
+              <SpeechToText
+                value={formData.name}
+                onChange={(name) => setFormData(prev => ({ ...prev, name }))}
+                language="en-IN"
+                size="sm"
+                placeholder="Speak patient name"
+              />
+            </div>
           </div>
         </div>
 

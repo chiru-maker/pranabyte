@@ -17,6 +17,7 @@ import {
   Bot, Clock, History, Printer, ExternalLink
 } from 'lucide-react';
 import { API_BASE } from '../../api/client';
+import { SpeechToText } from '../SpeechToText';
 
 interface DoctorDashboardProps {
   patient: Patient;
@@ -284,9 +285,21 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
 
           {/* Doctor Clinical Notes & Rx */}
           <div className="space-y-2 pt-3 border-t border-slate-800">
-            <label className="block text-xs font-bold text-white uppercase tracking-wider">
-              Doctor Clinical Notes, Diagnosis & Prescription
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-white uppercase tracking-wider">
+                Doctor Clinical Notes, Diagnosis & Prescription
+              </label>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-slate-400">Voice Dictation:</span>
+                <SpeechToText
+                  value={doctorNotes}
+                  onChange={setDoctorNotes}
+                  language="en-IN"
+                  size="sm"
+                  placeholder="Dictate clinical notes"
+                />
+              </div>
+            </div>
             <textarea
               rows={3}
               value={doctorNotes}

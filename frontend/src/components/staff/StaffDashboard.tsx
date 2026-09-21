@@ -1,6 +1,7 @@
-import React from 'react';
-import { Users, Clock, AlertTriangle, AlertOctagon, CheckCircle2, UserPlus, Eye, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, Clock, AlertTriangle, AlertOctagon, CheckCircle2, UserPlus, Eye, ArrowRight, Search } from 'lucide-react';
 import { Patient } from '../../types';
+import { SpeechToText } from '../SpeechToText';
 
 interface StaffDashboardProps {
   onSelectPatient: (patient: Patient) => void;
@@ -24,6 +25,14 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
     { id: 'pat_03', name: 'Siddharth Varma', age: 34, sex: 'Male', status: 'Requires Verification', complaint: 'Uncertain penicillin allergy declaration', time: '11:05 AM', isDemo: false },
     { id: 'pat_04', name: 'Kavita Joshi', age: 49, sex: 'Female', status: 'Waiting Intake', complaint: 'Mild hypertension checkup', time: '11:15 AM', isDemo: false },
   ];
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredPatients = queuePatients.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.complaint.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.status.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12 animate-fadeIn">
@@ -62,16 +71,42 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
 
       {/* Queue Table */}
       <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+        <div className="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-cyan-400" />
-            <span>Active Triage Queue</span>
-          </h3>
-          <span className="text-xs text-slate-400">Auto-refreshes with intake updates</span>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Active Triage Queue</h3>
+            <span className="text-xs text-slate-400">({filteredPatients.length} patients)</span>
+          </div>
+
+          {/* Voice-Enabled Search Bar */}
+          <div className="relative flex items-center min-w-[260px] max-w-sm w-full md:w-auto">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, status, or symptom..."
+              className="w-full pl-8 pr-11 py-1.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
+            />
+            <div className="absolute right-1 top-1/2 -translate-y-1/2">
+              <SpeechToText
+                value={searchQuery}
+                onChange={setSearchQuery}
+                language="en-IN"
+                size="sm"
+                placeholder="Speak patient name or search term"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="divide-y divide-slate-800 text-xs">
-          {queuePatients.map((p) => (
+          {filteredPatients.length === 0 ? (
+            <div className="p-8 text-center text-slate-400">
+              No patients found matching "{searchQuery}".
+            </div>
+          ) : (
+            filteredPatients.map((p) => (
             <div 
               key={p.id} 
               className="p-4 flex flex-wrap items-center justify-between gap-4 hover:bg-slate-800/40 transition"
@@ -133,7 +168,7 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
                 </button>
               </div>
             </div>
-          ))}
+          )))}
         </div>
       </div>
     </div>

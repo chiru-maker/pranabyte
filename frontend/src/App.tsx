@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/common/Navbar';
-import { Plasma } from './components/ui/Plasma';
+import { Plasma } from './components/Plasma';
 import { PatientRegistration } from './components/patient/PatientRegistration';
 import { ConsentScreen } from './components/patient/ConsentScreen';
 import { CaseTakingVoice } from './components/patient/CaseTakingVoice';
@@ -345,20 +345,24 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 relative overflow-x-hidden">
-      {/* Background Plasma Shader Component from React Bits */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
+    <div className="page-container min-h-screen bg-[#0b0f19] text-slate-100 relative overflow-x-hidden">
+      {/* React Bits Plasma Background */}
+      <div className="plasma-background fixed inset-0 z-0 pointer-events-none opacity-40">
         <Plasma
           color="#0284c7"
-          speed={0.5}
+          speed={0.6}
           direction="forward"
           scale={1.1}
           opacity={0.35}
           mouseInteractive={true}
+          renderScale={0.55}
+          maxDpr={1.5}
+          targetFps={60}
+          iterations={60}
         />
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="website-content relative z-10 flex flex-col min-h-screen">
         <Navbar onLoadDemo={handleLoadDemoPatient} />
 
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">

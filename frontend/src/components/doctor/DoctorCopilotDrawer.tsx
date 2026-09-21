@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bot, Send, Sparkles, AlertTriangle, CheckCircle2, ChevronRight, X, ExternalLink, HelpCircle } from 'lucide-react';
 import { API_BASE } from '../../api/client';
+import { SpeechToText } from '../SpeechToText';
 
 interface Citation {
   key: string;
@@ -215,17 +216,29 @@ export const DoctorCopilotDrawer: React.FC<DoctorCopilotDrawerProps> = ({
           }}
           className="flex items-center space-x-2"
         >
-          <input
-            type="text"
-            value={inputQuery}
-            onChange={e => setInputQuery(e.target.value)}
-            placeholder="Ask anything about this patient's case..."
-            className="flex-1 bg-slate-900 border border-slate-700 focus:border-cyan-500 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none placeholder-slate-500 transition"
-          />
+          <div className="relative flex-1 flex items-center">
+            <input
+              type="text"
+              value={inputQuery}
+              onChange={e => setInputQuery(e.target.value)}
+              placeholder="Ask or speak inquiries about this patient..."
+              className="w-full bg-slate-900 border border-slate-700 focus:border-cyan-500 rounded-xl pl-3.5 pr-11 py-2.5 text-sm text-white focus:outline-none placeholder-slate-500 transition"
+            />
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
+              <SpeechToText
+                value={inputQuery}
+                onChange={setInputQuery}
+                language="en-IN"
+                size="sm"
+                placeholder="Speak clinical query"
+              />
+            </div>
+          </div>
           <button
             type="submit"
             disabled={!inputQuery.trim() || loading}
             className="p-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-40 text-white rounded-xl shadow-lg transition"
+            title="Send query"
           >
             <Send className="w-4 h-4" />
           </button>
