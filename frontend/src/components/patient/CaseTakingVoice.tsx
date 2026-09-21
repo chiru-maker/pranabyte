@@ -91,6 +91,37 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
     }
   ];
 
+  // Quick suggested response chips for rapid selection
+  const quickOptions: Record<string, string[]> = {
+    q1_chief_complaint: [
+      language === 'hi' ? 'सीने में भारीपन और सांस फूलना' : language === 'kn' ? 'ಎದೆ ನೋವು ಮತ್ತು ಉಸಿರಾಟದ ತೊಂದರೆ' : 'Chest pain and tightness with breathlessness',
+      language === 'hi' ? 'तेज सिरदर्द और चक्कर आना' : language === 'kn' ? 'ತೀವ್ರ ತಲೆನೋವು ಮತ್ತು ತಲೆತಿರುಗುವಿಕೆ' : 'Severe persistent headache and dizziness',
+      language === 'hi' ? 'तेज बुखार और बदन दर्द' : language === 'kn' ? 'ಜ್ವರ ಮತ್ತು ಮೈಕೈ ನೋವು' : 'High fever with severe body ache',
+      language === 'hi' ? 'पेट में जलन और भारीपन' : language === 'kn' ? 'ಹೊಟ್ಟೆ ನೋವು ಮತ್ತು ಆಸಿಡಿಟಿ' : 'Stomach burning and gastric discomfort'
+    ],
+    q2_onset_duration: [
+      language === 'hi' ? '3 दिनों से लगातार हो रहा है' : language === 'kn' ? '3 ದಿನಗಳಿಂದ ನಿರಂತರವಾಗಿದೆ' : 'Started 3 days ago, worsening on exertion',
+      language === 'hi' ? 'आज सुबह अचानक शुरू हुआ' : language === 'kn' ? 'ಇಂದು ಮುಂಜಾನೆಯಿಂದ' : 'Started suddenly today morning',
+      language === 'hi' ? 'पिछले 1 हफ्ते से रुक-रुक कर' : language === 'kn' ? 'ಕಳೆದ 1 ವಾರದಿಂದ' : 'Intermittent for the past 1 week',
+      language === 'hi' ? 'कई महीनों से पुरानी समस्या है' : language === 'kn' ? 'ಕೆಲವು ತಿಂಗಳುಗಳಿಂದ' : 'Chronic ongoing condition for several months'
+    ],
+    q3_severity_radiation: [
+      language === 'hi' ? 'दर्द काफी तेज है और बाएं हाथ में फैलता है' : language === 'kn' ? 'ನೋವು ತೀವ್ರವಾಗಿದೆ ಮತ್ತು ಎಡಗೈಗೆ ಹರಡುತ್ತದೆ' : 'Severe discomfort radiating to left arm/shoulder',
+      language === 'hi' ? 'मध्यम दर्द है, कहीं फैलता नहीं है' : language === 'kn' ? 'ಮಧ್ಯಮ ನೋವು, ಎಲ್ಲಿಯೂ ಹರಡುವುದಿಲ್ಲ' : 'Moderate localized pain without radiation',
+      language === 'hi' ? 'हल्की तकलीफ है पर चलने पर बढ़ती है' : language === 'kn' ? 'ಲಘು ನೋವು' : 'Mild pressure, worsens during physical activity'
+    ],
+    q4_medications: [
+      language === 'hi' ? 'डायबिटीज और बीपी की नियमित गोलियां ले रहा हूं' : language === 'kn' ? 'ಮಧುಮೇಹ ಮತ್ತು ರಕ್ತದೊತ್ತಡದ ಮಾತ್ರೆಗಳು' : 'Taking regular Metformin 500mg and Amlodipine 5mg',
+      language === 'hi' ? 'एस्पिरिन 2 महीने पहले एसिडिटी के कारण बंद कर दी' : language === 'kn' ? 'ಆಸ್ಪಿರಿನ್ ನಿಲ್ಲಿಸಲಾಗಿದೆ' : 'Stopped Aspirin ~2 months ago due to gastric irritation',
+      language === 'hi' ? 'कोई नियमित दवा नहीं चल रही है' : language === 'kn' ? 'ಯಾವುದೇ ನಿಯಮಿತ ಔಷಧಿಗಳಿಲ್ಲ' : 'Not currently taking any prescription medications'
+    ],
+    q5_allergies: [
+      language === 'hi' ? 'पेनिसिलिन से त्वचा पर चकत्ते/एलर्जी होती है' : language === 'kn' ? 'ಪೆನ್ಸಿಲಿನ್ ಅಲರ್ಜಿ ಇದೆ' : 'Known allergic reaction (skin rash) to Penicillin',
+      language === 'hi' ? 'कोई ज्ञात दवा एलर्जी नहीं है' : language === 'kn' ? 'ಯಾವುದೇ ಅಲರ್ಜಿ ಇಲ್ಲ' : 'No known drug or food allergies',
+      language === 'hi' ? 'सल्फा दवाओं से एलर्जी है' : language === 'kn' ? 'ಸಲ್ಫಾ ಔಷಧಿ ಅಲರ್ಜಿ' : 'Allergic to Sulfa-based medications'
+    ]
+  };
+
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [recordedAnswers, setRecordedAnswers] = useState<Record<string, VoiceAnswerRecord>>({});
   
@@ -99,10 +130,14 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
   const [liveInterim, setLiveInterim] = useState('');
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<string | null>(null);
   const [isManualInput, setIsManualInput] = useState(false);
   const [manualText, setManualText] = useState('');
 
   const recognitionRef = useRef<any>(null);
+  const isRecordingActiveRef = useRef<boolean>(false);
+  const retryCountRef = useRef<number>(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const activeQuestion = questions[currentQIndex];
 
   // Sync current question stored answer if moving between questions
@@ -119,11 +154,13 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
       setVoiceStatus('idle');
     }
     setErrorMessage(null);
+    setErrorType(null);
   }, [currentQIndex]);
 
   // Clean up recognition on unmount
   useEffect(() => {
     return () => {
+      isRecordingActiveRef.current = false;
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
@@ -133,7 +170,8 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
   }, []);
 
   // Map app language to speech recognition locale
-  const getRecognitionLang = () => {
+  const getRecognitionLang = (useFallback = false) => {
+    if (useFallback) return navigator.language || 'en-US';
     if (language === 'hi') return 'hi-IN';
     if (language === 'kn') return 'kn-IN';
     return 'en-IN';
@@ -142,6 +180,7 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
   // Start Real Browser Speech Recognition
   const startRecording = async () => {
     setErrorMessage(null);
+    setErrorType(null);
     setLiveInterim('');
 
     // 1. Check browser support
@@ -150,6 +189,7 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
 
     if (!SpeechRecognition) {
       setVoiceStatus('unsupported');
+      setErrorType('unsupported');
       setErrorMessage(
         'Voice input is not supported in this browser. Please use Chrome/Edge or type your answer using the keyboard below.'
       );
@@ -165,6 +205,7 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
       }
     } catch (permErr: any) {
       setVoiceStatus('permission_denied');
+      setErrorType('permission_denied');
       setErrorMessage(
         'Microphone access was blocked. Please allow microphone permissions in your browser settings and try again.'
       );
@@ -180,10 +221,13 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
       }
 
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;
+      // Using continuous = false with seamless onend restart prevents Chrome websocket dropouts
+      recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = getRecognitionLang();
+      recognition.lang = getRecognitionLang(retryCountRef.current > 0);
       recognition.maxAlternatives = 1;
+
+      isRecordingActiveRef.current = true;
 
       recognition.onstart = () => {
         setVoiceStatus('listening');
@@ -211,30 +255,61 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
         if (final) {
           setCurrentTranscript((prev) => (prev ? `${prev.trim()} ${final.trim()}` : final.trim()));
           setLiveInterim('');
+          retryCountRef.current = 0;
         }
       };
 
       recognition.onerror = (event: any) => {
         const error = event.error;
+        console.warn('Speech recognition event error:', error);
+        
         if (error === 'not-allowed' || error === 'service-not-allowed') {
+          isRecordingActiveRef.current = false;
           setVoiceStatus('permission_denied');
+          setErrorType('permission_denied');
           setErrorMessage('Microphone access was blocked. Please enable microphone permissions in your browser.');
         } else if (error === 'no-speech') {
+          // If no speech detected in this discrete segment, restart if still active
+          if (isRecordingActiveRef.current) {
+            try {
+              recognition.start();
+              return;
+            } catch {}
+          }
           setVoiceStatus('idle');
-          setErrorMessage('No speech was detected. Please click Start Speaking and speak clearly into your microphone.');
+          setErrorMessage('No speech detected. Please speak clearly into your microphone.');
         } else if (error === 'audio-capture') {
+          isRecordingActiveRef.current = false;
           setVoiceStatus('error');
+          setErrorType('audio_capture');
           setErrorMessage('No microphone hardware detected. Please ensure your microphone is plugged in.');
         } else if (error === 'network') {
+          isRecordingActiveRef.current = false;
           setVoiceStatus('error');
-          setErrorMessage('Network issue occurred during speech recognition. Please try again or type your answer.');
+          setErrorType('network');
+          // If regional locale had network issue, try standard locale once
+          if (retryCountRef.current === 0) {
+            retryCountRef.current = 1;
+            setErrorMessage('Browser speech service connection timed out. You can retry with standard locale or type your answer below.');
+          } else {
+            setErrorMessage('Cloud speech recognition is currently unreachable on your network. You can type your answer or select a quick option below.');
+          }
         } else if (error !== 'aborted') {
+          isRecordingActiveRef.current = false;
           setVoiceStatus('error');
-          setErrorMessage(`Speech recognition error: ${error}`);
+          setErrorType('general');
+          setErrorMessage(`Speech recognition error: ${error}. You can type your response instead.`);
         }
       };
 
       recognition.onend = () => {
+        // If user is still recording and no fatal error stopped it, restart seamlessly for next utterance
+        if (isRecordingActiveRef.current) {
+          try {
+            recognition.start();
+            return;
+          } catch {}
+        }
         setVoiceStatus((prev) => (prev === 'listening' ? 'transcript_available' : prev));
         setLiveInterim('');
       };
@@ -242,13 +317,16 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
       recognitionRef.current = recognition;
       recognition.start();
     } catch (err: any) {
+      isRecordingActiveRef.current = false;
       setVoiceStatus('error');
-      setErrorMessage('Could not initiate microphone recognition. Please try typing instead.');
+      setErrorType('start_failed');
+      setErrorMessage('Could not initiate microphone recognition. Please try typing your answer instead.');
     }
   };
 
   // Stop Recording
   const stopRecording = () => {
+    isRecordingActiveRef.current = false;
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -260,6 +338,32 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
     }
     setVoiceStatus('transcript_available');
     setLiveInterim('');
+  };
+
+  // Switch to Manual Typing with Auto-Focus
+  const switchToManualTyping = (initialText?: string) => {
+    stopRecording();
+    const textToUse = initialText !== undefined ? initialText : currentTranscript;
+    setManualText(textToUse);
+    setIsManualInput(true);
+    setErrorMessage(null);
+    setErrorType(null);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    }, 100);
+  };
+
+  // Select Quick Suggestion
+  const handleSelectQuickOption = (option: string) => {
+    stopRecording();
+    const newText = currentTranscript ? `${currentTranscript.trim()}, ${option}` : option;
+    setCurrentTranscript(newText);
+    setManualText(newText);
+    setVoiceStatus('transcript_available');
+    setErrorMessage(null);
+    setErrorType(null);
   };
 
   // Confirm Answer and Move to Next Question
@@ -352,23 +456,67 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
         </h2>
       </div>
 
-      {/* Status & Error Alerts */}
+      {/* Status & Error Recovery Banner */}
       {errorMessage && (
         <div
           role="alert"
-          className="p-3.5 rounded-2xl bg-[#fee2e2] text-[#b91c1c] text-xs border border-[#fca5a5] flex items-start gap-2 animate-fadeIn"
+          className="p-4 rounded-2xl bg-[#fee2e2] text-[#991b1b] text-xs border border-[#fca5a5] space-y-3 animate-fadeIn"
         >
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <span className="font-bold block">Notice:</span>
-            <span>{errorMessage}</span>
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#b91c1c]" />
+            <div className="flex-1 space-y-1">
+              <span className="font-bold block text-[#7f1d1d]">Speech Recognition Notice:</span>
+              <p className="text-xs leading-relaxed text-[#991b1b]">{errorMessage}</p>
+            </div>
+          </div>
+
+          {/* Direct Recovery Actions */}
+          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#fca5a5]/60">
+            <button
+              type="button"
+              onClick={startRecording}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#fca5a5] text-[#991b1b] hover:bg-[#fef2f2] font-semibold text-xs transition"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Retry Speaking</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => switchToManualTyping()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#b91c1c] text-white hover:bg-[#991b1b] font-semibold text-xs shadow-sm transition"
+            >
+              <Keyboard className="w-3.5 h-3.5" />
+              <span>Type Answer Instead</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Suggested Answers (Always available for 1-click convenience) */}
+      {quickOptions[activeQuestion.id] && (
+        <div className="p-3.5 rounded-2xl bg-parchment-200/70 border border-parchment-400 space-y-2">
+          <span className="text-[11px] font-bold text-ink-graphite uppercase tracking-wider flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-terracotta" />
+            <span>Quick Suggestions (Click to insert):</span>
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {quickOptions[activeQuestion.id].map((opt, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSelectQuickOption(opt)}
+                className="text-xs px-2.5 py-1 rounded-full bg-white hover:bg-parchment-100 border border-parchment-400 text-ink hover:border-terracotta hover:text-terracotta transition font-medium text-left shadow-2xs"
+              >
+                + {opt}
+              </button>
+            ))}
           </div>
         </div>
       )}
 
       {/* Primary Voice Recording Station */}
       {!isManualInput ? (
-        <div className="flex flex-col items-center justify-center space-y-4 py-4">
+        <div className="flex flex-col items-center justify-center space-y-4 py-3">
           <div className="relative">
             {voiceStatus === 'listening' && (
               <div className="absolute -inset-4 rounded-full bg-terracotta/25 animate-ping" />
@@ -440,10 +588,7 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
               {currentTranscript && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setManualText(currentTranscript);
-                    setIsManualInput(true);
-                  }}
+                  onClick={() => switchToManualTyping()}
                   className="text-xs text-ink-graphite hover:text-ink font-semibold flex items-center gap-1"
                 >
                   <Edit3 className="w-3 h-3" />
@@ -462,7 +607,7 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
                 <span className="text-terracotta italic font-normal">{liveInterim}...</span>
               ) : (
                 <span className="text-ink-muted italic">
-                  Press the microphone button above to start speaking...
+                  Press the microphone button above to start speaking, or choose a quick suggestion...
                 </span>
               )}
             </p>
@@ -487,11 +632,12 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
           </div>
 
           <textarea
+            ref={textareaRef}
             rows={4}
             value={manualText}
             onChange={(e) => setManualText(e.target.value)}
-            placeholder="Type your response to the question here..."
-            className="w-full p-3 bg-white border border-parchment-400 rounded-xl text-xs text-ink leading-relaxed focus:outline-none focus:border-terracotta"
+            placeholder="Type your response to the question here or select suggestions above..."
+            className="w-full p-3 bg-white border border-parchment-400 rounded-xl text-xs text-ink leading-relaxed focus:outline-none focus:border-terracotta shadow-2xs"
           />
         </div>
       )}
@@ -501,10 +647,7 @@ export const CaseTakingVoice: React.FC<CaseTakingVoiceProps> = ({
         <div className="text-center">
           <button
             type="button"
-            onClick={() => {
-              setManualText(currentTranscript);
-              setIsManualInput(true);
-            }}
+            onClick={() => switchToManualTyping()}
             className="text-xs text-ink-graphite hover:text-ink font-semibold underline flex items-center gap-1 mx-auto"
           >
             <Keyboard className="w-3.5 h-3.5" />
