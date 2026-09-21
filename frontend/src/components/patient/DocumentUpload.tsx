@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Upload, FileText, CheckCircle2, AlertCircle, Sparkles, Eye, ArrowRight } from 'lucide-react';
-import { StatusBadge } from '../ui/Badge';
+import { UploadCloud, FileText, CheckCircle2, ArrowRight, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface DocumentUploadProps {
-  onDocumentProcessed: () => void;
+  onDocumentProcessed?: () => void;
   onProceedToDoctor: () => void;
 }
 
@@ -11,126 +10,111 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   onDocumentProcessed,
   onProceedToDoctor
 }) => {
-  const [file, setFile] = useState<File | null>(null);
-  const [fileType, setFileType] = useState('prescription');
-  const [uploading, setUploading] = useState(false);
-  const [extractedData, setExtractedData] = useState<any | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; status: string; extractions: string[] }[]>([
+    {
+      name: 'Apollo_Cardiology_Rx_14Aug2026.pdf',
+      status: 'OCR Verified (98% Confidence)',
+      extractions: [
+        'Tab. Metformin 500mg BD [Active]',
+        'Tab. Amlodipine 5mg OD [Active]',
+        'Tab. Ecosprin 75mg OD [Documented Active]',
+        'Known Allergy: Penicillin (Severe Cutaneous)'
+      ]
+    }
+  ]);
 
-  const handleSimulateOCR = () => {
-    setUploading(true);
+  const handleSimulateUpload = () => {
+    setIsUploading(true);
     setTimeout(() => {
-      setUploading(false);
-      setExtractedData({
-        filename: 'Apollo_Prescription_14Aug2026.pdf',
-        hospital: 'Apollo Multispeciality Hospitals, Bangalore',
-        date: '14-Aug-2026',
-        doctor: 'Dr. S. K. Narayanan, MD (Internal Medicine)',
-        entities: [
-          { type: 'Condition', val: 'Type 2 Diabetes Mellitus (T2DM)', status: 'DOCUMENTED', conf: 0.99 },
-          { type: 'Condition', val: 'Essential Systemic Hypertension', status: 'DOCUMENTED', conf: 0.96 },
-          { type: 'Medication', val: 'Tab. Metformin 500mg (1-0-1) After Food', status: 'DOCUMENTED', conf: 0.98 },
-          { type: 'Medication', val: 'Tab. Ecosprin (Aspirin) 75mg (0-1-0) [ACTIVE]', status: 'DOCUMENTED', conf: 0.95 },
-          { type: 'Medication', val: 'Tab. Amlodipine 5mg? (Morning) [Blurry Text]', status: 'UNCERTAIN', conf: 0.72 },
-          { type: 'Allergy', val: 'Penicillin (Severe Cutaneous Hypersensitivity)', status: 'DOCUMENTED', conf: 0.95 },
-          { type: 'Observation', val: 'Blood Pressure: 142/90 mmHg', status: 'DOCUMENTED', conf: 0.93 },
-          { type: 'Lab Value', val: 'HbA1c: 7.8% (Borderline)', status: 'DOCUMENTED', conf: 0.97 }
-        ]
-      });
-      onDocumentProcessed();
-    }, 1200);
+      setUploadedFiles(prev => [
+        {
+          name: 'Echo_ECG_Report_Aug2026.pdf',
+          status: 'OCR Completed (96% Confidence)',
+          extractions: [
+            'LVEF 55% (Normal LV systolic function)',
+            'Mild concentric LVH noted'
+          ]
+        },
+        ...prev
+      ]);
+      setIsUploading(false);
+      if (onDocumentProcessed) onDocumentProcessed();
+    }, 1000);
   };
 
   return (
-    <div className="max-w-2xl mx-auto glass-panel p-8 rounded-2xl border border-slate-700/80 shadow-2xl animate-fadeIn space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Upload Medical Records & Prescriptions</h2>
-          <p className="text-xs text-slate-400">PDF, JPG, PNG supported • Automated OCR with 🔵 DOCUMENTED status tagging</p>
+    <div className="max-w-2xl mx-auto paper-card p-6 sm:p-8 space-y-6 animate-fadeIn">
+      <div className="text-center space-y-2">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-terracotta-light text-terracotta border border-terracotta/20 text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Step 5: Optical Character Recognition (OCR)</span>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-semibold">
-          OCR Engine v1.0
+        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-ink">
+          Upload Prior Prescriptions & Reports
+        </h2>
+        <p className="text-xs sm:text-sm text-ink-charcoal max-w-md mx-auto">
+          Pranabyte extracts historical medications, lab values, and allergies directly from physical documents.
+        </p>
+      </div>
+
+      {/* Upload Drop Area */}
+      <div
+        onClick={handleSimulateUpload}
+        className="p-8 rounded-2xl bg-parchment border-2 border-dashed border-parchment-400 hover:border-terracotta flex flex-col items-center justify-center text-center cursor-pointer transition group"
+      >
+        <div className="w-14 h-14 rounded-full bg-terracotta-light text-terracotta flex items-center justify-center mb-3 group-hover:scale-110 transition">
+          {isUploading ? <RefreshCw className="w-6 h-6 animate-spin" /> : <UploadCloud className="w-6 h-6" />}
+        </div>
+        <span className="text-sm font-bold text-ink block mb-1">
+          {isUploading ? 'Scanning & Ingesting Medical Document...' : 'Click to Upload Prescription or Lab PDF'}
+        </span>
+        <span className="text-xs text-ink-graphite">
+          Supports PDF, JPG, PNG from phone camera or hospital records
         </span>
       </div>
 
-      {/* Upload Dropzone */}
-      <div className="p-6 rounded-2xl border-2 border-dashed border-slate-700 hover:border-cyan-500 bg-slate-900/60 text-center transition">
-        <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto mb-3">
-          <Upload className="w-6 h-6 text-cyan-400" />
-        </div>
-        <h4 className="text-sm font-semibold text-white">Select Previous Hospital Prescription or Report</h4>
-        <p className="text-xs text-slate-400 mt-1 mb-4">
-          Click below to load sample prescription or choose from device
-        </p>
+      {/* Uploaded Documents List */}
+      <div className="space-y-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-ink block">
+          Ingested Documents & Clinical Extractions:
+        </span>
 
-        <div className="flex items-center justify-center gap-3">
-          <select
-            value={fileType}
-            onChange={(e) => setFileType(e.target.value)}
-            className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
-          >
-            <option value="prescription">Prescription</option>
-            <option value="lab_report">Lab Report (Blood / ECG)</option>
-            <option value="discharge_summary">Discharge Summary</option>
-          </select>
-
-          <button
-            type="button"
-            onClick={handleSimulateOCR}
-            disabled={uploading}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-semibold text-xs shadow transition flex items-center gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{uploading ? 'Processing OCR...' : 'Process Prescription OCR'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Extracted Entities List */}
-      {extractedData && (
-        <div className="space-y-4 p-5 rounded-xl bg-slate-900/90 border border-slate-800">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-sky-400" />
-              <span className="text-xs font-bold text-white uppercase tracking-wider">
-                {extractedData.filename}
+        {uploadedFiles.map((doc, idx) => (
+          <div key={idx} className="p-4 rounded-2xl bg-parchment border border-parchment-400 space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-ink">
+                <FileText className="w-4 h-4 text-terracotta" />
+                <span>{doc.name}</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-[#dcfce7] text-[#15803d] font-semibold text-[10px]">
+                {doc.status}
               </span>
             </div>
-            <span className="text-xs text-emerald-400 font-medium">
-              ✓ 8 Clinical Entities Extracted
-            </span>
-          </div>
 
-          <div className="text-xs text-slate-400">
-            <strong>Facility:</strong> {extractedData.hospital} | <strong>Date:</strong> {extractedData.date}
-          </div>
-
-          <div className="space-y-2 pt-2 border-t border-slate-800">
-            {extractedData.entities.map((ent: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/60 text-xs">
-                <div>
-                  <span className="text-slate-400 font-medium mr-2">[{ent.type}]</span>
-                  <span className="text-white font-semibold">{ent.val}</span>
+            <div className="pl-6 space-y-1">
+              {doc.extractions.map((ext, i) => (
+                <div key={i} className="text-ink-charcoal flex items-center gap-1.5 text-xs">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#15803d] shrink-0" />
+                  <span>{ext}</span>
                 </div>
-                <StatusBadge status={ent.status} confidence={ent.conf} />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+        ))}
+      </div>
 
-          <div className="p-3 rounded-lg bg-sky-950/40 border border-sky-800/40 text-[11px] text-sky-300">
-            ℹ️ <strong>Safety Rule:</strong> OCR extractions are never automatically treated as final clinical truth. All items marked as 🔵 DOCUMENTED or 🟡 UNCERTAIN for doctor verification.
-          </div>
-        </div>
-      )}
-
-      {/* Proceed to Doctor */}
-      <button
-        type="button"
-        onClick={onProceedToDoctor}
-        className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2"
-      >
-        <span>Open Doctor Consultation Portal</span>
-        <ArrowRight className="w-4 h-4" />
-      </button>
+      {/* Proceed Button */}
+      <div className="pt-2">
+        <button
+          type="button"
+          onClick={onProceedToDoctor}
+          className="w-full btn-terracotta text-sm py-3.5"
+        >
+          <span>Proceed to Patient Self-Review & Verification</span>
+          <ArrowRight className="w-4 h-4 ml-1" />
+        </button>
+      </div>
     </div>
   );
 };

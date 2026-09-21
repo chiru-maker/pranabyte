@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, AlertCircle, Edit3, ShieldCheck, Sparkles, Send, ArrowRight } from 'lucide-react';
-import { API_BASE } from '../../api/client';
-
-interface FactItem {
-  id: string;
-  category: string;
-  name: string;
-  value: string;
-  source: string;
-  confirmed: boolean;
-}
+import { UserCheck, CheckCircle2, Edit3, ArrowRight, ShieldCheck, Sparkles, AlertCircle, Plus } from 'lucide-react';
 
 interface PatientCorrectionScreenProps {
   visitId: string;
@@ -22,178 +12,155 @@ export const PatientCorrectionScreen: React.FC<PatientCorrectionScreenProps> = (
   patientName,
   onDone
 }) => {
-  const [facts, setFacts] = useState<FactItem[]>([
-    { id: '1', category: 'Chief Reason for Visit', name: 'Chest Pain & Breathlessness', value: 'Started 3 days ago, increases when walking fast', source: 'Spoken by you', confirmed: true },
-    { id: '2', category: 'Past Conditions', name: 'Type 2 Diabetes', value: 'Diagnosed in 2024, taking Metformin', source: 'Apollo Hospital Record', confirmed: true },
-    { id: '3', category: 'Past Conditions', name: 'High Blood Pressure', value: 'Stage 1 Hypertension on Amlodipine', source: 'Apollo Hospital Record', confirmed: true },
-    { id: '4', category: 'Medications', name: 'Aspirin (Ecosprin 75mg)', value: 'You reported stopping this 2 months ago', source: 'Your Voice Statement', confirmed: true },
-    { id: '5', category: 'Allergies', name: 'Penicillin', value: 'Skin allergy / rash', source: 'Prior Medical File', confirmed: true }
+  const [symptoms, setSymptoms] = useState<string[]>([
+    'Substernal chest pain (3 days duration, moderate-severe)',
+    'Shortness of breath / dyspnea on mild physical exertion',
+    'Pain does not radiate to left arm',
+    'Stopped taking Aspirin (Ecosprin 75mg) 2 months ago'
   ]);
 
-  const [disputeNotes, setDisputeNotes] = useState<{ [key: string]: string }>({});
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newSymptomText, setNewSymptomText] = useState('');
   const [isConfirmed, setIsConfirmed] = useState(false);
 
-  const handleToggleConfirm = (id: string) => {
-    setFacts(prev => prev.map(f => f.id === id ? { ...f, confirmed: !f.confirmed } : f));
+  const handleStartEdit = (idx: number) => {
+    setIsEditing(idx);
+    setEditText(symptoms[idx]);
   };
 
-  const handleSaveEdit = (id: string) => {
-    setDisputeNotes(prev => ({ ...prev, [id]: editText }));
-    setEditingId(null);
-    setEditText('');
+  const handleSaveEdit = (idx: number) => {
+    if (!editText.trim()) return;
+    const updated = [...symptoms];
+    updated[idx] = editText.trim();
+    setSymptoms(updated);
+    setIsEditing(null);
   };
 
-  const handleSubmitReview = async () => {
-    setIsSubmitting(true);
-    try {
-      await fetch(`${API_BASE}/doctor/patient-confirm/${visitId || 'default'}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ corrections: disputeNotes })
-      });
-    } catch (e) {
-      console.log("Offline mode confirmation");
-    } finally {
-      setIsSubmitting(false);
-      setIsConfirmed(true);
-      setTimeout(() => {
-        onDone();
-      }, 1500);
-    }
+  const handleAddSymptom = () => {
+    if (!newSymptomText.trim()) return;
+    setSymptoms([...symptoms, newSymptomText.trim()]);
+    setNewSymptomText('');
+  };
+
+  const handleFinalSubmit = () => {
+    setIsConfirmed(true);
+    setTimeout(() => {
+      onDone();
+    }, 600);
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div className="max-w-2xl mx-auto paper-card p-6 sm:p-8 space-y-6 animate-fadeIn">
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 mb-1 border border-cyan-500/30">
-          <ShieldCheck className="w-6 h-6" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-terracotta-light text-terracotta border border-terracotta/20 text-xs font-semibold">
+          <UserCheck className="w-3.5 h-3.5" />
+          <span>Step 6: Patient Self-Review & Verification</span>
         </div>
-        <h2 className="text-2xl font-bold text-white">Review Your Medical Story</h2>
-        <p className="text-sm text-slate-400">
-          Dear <strong className="text-white">{patientName}</strong>, please review what our AI summarized from your voice and files. If anything is wrong, you can correct it before the doctor sees it.
+        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-ink">
+          Verify Your Extracted Case
+        </h2>
+        <p className="text-xs sm:text-sm text-ink-charcoal max-w-md mx-auto">
+          Please confirm that these statements accurately reflect what you experienced before submitting to Dr. Priya Sharma.
         </p>
       </div>
 
-      {isConfirmed ? (
-        <div className="p-8 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center space-y-3 animate-fade-in">
-          <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-          <h3 className="text-lg font-bold text-white">Case Sheet Confirmed!</h3>
-          <p className="text-sm text-slate-300">
-            Thank you. Your confirmed case summary has been sent directly to the doctor's screen.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="space-y-3">
-            {facts.map(f => {
-              const hasCorrection = Boolean(disputeNotes[f.id]);
+      {/* Verification Notice */}
+      <div className="p-3.5 rounded-2xl bg-parchment-200 border border-parchment-400 text-xs text-ink-charcoal flex items-center gap-2.5">
+        <ShieldCheck className="w-4 h-4 text-terracotta shrink-0" />
+        <span>You may edit or add symptoms at this stage. Your verified statements will be highlighted for the clinician.</span>
+      </div>
 
-              return (
-                <div
-                  key={f.id}
-                  className={`p-4 rounded-xl border transition-all ${
-                    hasCorrection
-                      ? 'bg-amber-950/30 border-amber-500/50'
-                      : f.confirmed
-                      ? 'bg-slate-900/80 border-slate-800'
-                      : 'bg-rose-950/30 border-rose-500/40'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
-                        {f.category}
-                      </span>
-                      <h4 className="font-bold text-white text-sm mt-0.5">{f.name}</h4>
-                      <p className="text-xs text-slate-300 mt-1">{f.value}</p>
-                      <span className="inline-block mt-2 text-[10px] text-slate-500 italic">
-                        Source: {f.source}
-                      </span>
-
-                      {hasCorrection && (
-                        <div className="mt-2 p-2 rounded-lg bg-amber-900/30 border border-amber-600/40 text-xs text-amber-200">
-                          <strong>Your Correction Note:</strong> {disputeNotes[f.id]}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => {
-                          setEditingId(f.id);
-                          setEditText(disputeNotes[f.id] || '');
-                        }}
-                        className="p-1.5 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded-lg transition"
-                        title="Add note/correction"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleToggleConfirm(f.id)}
-                        className={`p-1.5 rounded-lg transition ${
-                          f.confirmed
-                            ? 'text-emerald-400 bg-emerald-500/10'
-                            : 'text-slate-500 hover:text-white'
-                        }`}
-                        title={f.confirmed ? 'Confirmed' : 'Mark as needing check'}
-                      >
-                        <CheckCircle2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {editingId === f.id && (
-                    <div className="mt-3 pt-3 border-t border-slate-700/60 space-y-2">
-                      <input
-                        type="text"
-                        value={editText}
-                        onChange={e => setEditText(e.target.value)}
-                        placeholder="Type your correction (e.g., 'I take 1000mg, not 500mg')..."
-                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
-                      />
-                      <div className="flex justify-end space-x-2">
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="px-3 py-1 rounded text-xs text-slate-400 hover:text-white"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => handleSaveEdit(f.id)}
-                          className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-semibold"
-                        >
-                          Save Note
-                        </button>
-                      </div>
-                    </div>
-                  )}
+      {/* Symptom List with Edit Capabilities */}
+      <div className="space-y-3">
+        {symptoms.map((sym, idx) => (
+          <div key={idx} className="p-4 rounded-2xl bg-parchment border border-parchment-400 space-y-2 text-xs">
+            {isEditing === idx ? (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  className="w-full p-2.5 bg-[#ffffff] border border-parchment-400 rounded-xl text-ink text-xs focus:outline-none focus:border-terracotta font-medium"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(null)}
+                    className="btn-secondary-paper text-xs px-3 py-1"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSaveEdit(idx)}
+                    className="btn-terracotta text-xs px-3 py-1"
+                  >
+                    Save Correction
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5 text-ink font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-[#15803d] shrink-0 mt-0.5" />
+                  <span>{sym}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleStartEdit(idx)}
+                  className="text-ink-graphite hover:text-ink flex items-center gap-1 font-semibold text-[11px] shrink-0"
+                >
+                  <Edit3 className="w-3 h-3" />
+                  <span>Edit</span>
+                </button>
+              </div>
+            )}
           </div>
+        ))}
+      </div>
 
-          <div className="pt-4">
-            <button
-              onClick={handleSubmitReview}
-              disabled={isSubmitting}
-              className="w-full py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg flex items-center justify-center space-x-2 transition"
-            >
-              {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  <span>I Confirm These Details &mdash; Proceed to OPD Queue</span>
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Add Missing Symptom Box */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={newSymptomText}
+          onChange={(e) => setNewSymptomText(e.target.value)}
+          placeholder="Add any additional symptom you forgot to mention..."
+          className="flex-1 px-4 py-2.5 bg-parchment border border-parchment-400 rounded-full text-ink text-xs focus:outline-none focus:border-terracotta"
+        />
+        <button
+          type="button"
+          onClick={handleAddSymptom}
+          disabled={!newSymptomText.trim()}
+          className="btn-secondary-paper text-xs px-4 py-2"
+        >
+          <Plus className="w-3.5 h-3.5 text-terracotta" />
+          <span>Add</span>
+        </button>
+      </div>
+
+      {/* Confirmation & Submit to Queue */}
+      <div className="pt-3 border-t border-parchment-400">
+        <button
+          type="button"
+          onClick={handleFinalSubmit}
+          className="w-full btn-terracotta text-sm py-3.5 shadow-warm"
+        >
+          {isConfirmed ? (
+            <span className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Verified! Queuing for Dr. Priya Sharma...</span>
+            </span>
+          ) : (
+            <>
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Confirm & Submit Case to Doctor Workstation</span>
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 };

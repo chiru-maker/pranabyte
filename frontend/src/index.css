@@ -2,56 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color-scheme: dark;
+@layer base {
+  :root {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    color-scheme: light;
+    --canvas: #fef9ef;
+    --surface: #f5eee1;
+    --border-warm: #d1c9bf;
+    --ink: #2a2b2f;
+    --terracotta: #b05a36;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #fef9ef;
+    color: #2a2b2f;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Keyboard Accessible Visible Focus Rings (WCAG 2.2 AA) */
+  :focus-visible {
+    outline: 2px solid #b05a36 !important;
+    outline-offset: 2px !important;
+  }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: #0b0f19;
-}
-
-/* Custom Healthcare Scrollbar */
+/* Warm Parchment Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #f5eee1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
+  background: #d1c9bf;
+  border-radius: 9999px;
+  border: 2px solid #f5eee1;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #b8ada0;
 }
 
-/* Glassmorphism helpers */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Editorial Paper Card Styling */
+.paper-card {
+  background-color: #f5eee1;
+  border: 1px solid #d1c9bf;
+  border-radius: 24px;
+  box-shadow: 0 4px 14px rgba(42, 43, 47, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.paper-card-interactive {
+  background-color: #f5eee1;
+  border: 1px solid #d1c9bf;
+  border-radius: 24px;
+  box-shadow: 0 4px 14px rgba(42, 43, 47, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.paper-card-interactive:hover {
+  background-color: #ede4d3;
+  border-color: #b8ada0;
+  box-shadow: 0 8px 20px rgba(42, 43, 47, 0.08);
+  transform: translateY(-1px);
 }
 
-.clinical-badge-pulse {
-  animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Tactile Pill Buttons */
+.btn-terracotta {
+  background-color: #b05a36;
+  color: #ffffff;
+  border-radius: 9999px;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(176, 90, 54, 0.25);
+  transition: all 0.18s ease-in-out;
+}
+.btn-terracotta:hover:not(:disabled) {
+  background-color: #9c4f2f;
+  box-shadow: 0 4px 12px rgba(176, 90, 54, 0.35);
+  transform: translateY(-1px);
+}
+.btn-terracotta:active:not(:disabled) {
+  transform: translateY(0);
+}
+.btn-terracotta:disabled {
+  background-color: #d1c9bf;
+  color: #78716c;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
-@keyframes pulse-border {
+.btn-secondary-paper {
+  background-color: #f5eee1;
+  color: #2a2b2f;
+  border: 1px solid #d1c9bf;
+  border-radius: 9999px;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.18s ease-in-out;
+}
+.btn-secondary-paper:hover:not(:disabled) {
+  background-color: #ede4d3;
+  border-color: #b8ada0;
+}
+
+/* Pulsing Badge & Red Flag Highlights */
+.red-flag-pulse {
+  animation: pulse-warm 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-warm {
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: .5;
+    opacity: 0.85;
+    transform: scale(1.02);
   }
 }

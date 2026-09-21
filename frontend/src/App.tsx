@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/common/Navbar';
-import { Plasma } from './components/Plasma';
+import { LandingPage } from './components/public/LandingPage';
+import { NotFoundPage } from './components/public/NotFoundPage';
+import { PrivacyPolicyPage } from './components/public/PrivacyPolicyPage';
 import { PatientRegistration } from './components/patient/PatientRegistration';
 import { ConsentScreen } from './components/patient/ConsentScreen';
 import { CaseTakingVoice } from './components/patient/CaseTakingVoice';
@@ -11,12 +13,17 @@ import { DocumentUpload } from './components/patient/DocumentUpload';
 import { PatientCorrectionScreen } from './components/patient/PatientCorrectionScreen';
 import { DoctorDashboard } from './components/doctor/DoctorDashboard';
 import { StaffDashboard } from './components/staff/StaffDashboard';
+import { AdminDashboard } from './components/admin/AdminDashboard';
 import { Patient, Visit, ClinicalFact, Contradiction, RedFlag, TimelineEvent } from './types';
+import { ShieldCheck, Sparkles, HeartPulse, CheckCircle2 } from 'lucide-react';
 
 function MainApp() {
   const { role, switchRole } = useAuth();
 
-  // Patient Intake States (1: Register, 2: Consent, 3: Voice, 4: Questions, 5: Upload, 6: Patient Review & Confirm)
+  // Active top-level view: 'landing' | 'app' | 'privacy' | '404'
+  const [activeView, setActiveView] = useState<string>('landing');
+
+  // Patient Intake Stepper (1: Register, 2: Consent, 3: Voice, 4: Questions, 5: Upload, 6: Patient Review & Confirm)
   const [patientStep, setPatientStep] = useState<number>(1);
   const [loadingVoice, setLoadingVoice] = useState(false);
 
@@ -42,9 +49,11 @@ function MainApp() {
     completeness_score: 85,
     questions_asked_count: 3,
     questions_avoided_count: 12,
-    ai_summary_draft: `### PATIENT CASE SUMMARY DRAFT\n*NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*\n\n**PATIENT:** Rahul Kumar | **AGE/SEX:** 58Y Male | **ID:** PAT-2026-0891 | **ABHA:** 91-8273-9912-0041\n\n---\n\n**1. CHIEF COMPLAINT:**\nCentral retrosternal chest pain for 3 days, accompanied by intermittent breathlessness on mild exertion.\n\n**2. CURRENT HISTORY & SYMPTOMS:**\n- Chest Pain: Moderate-Severe, onset 3 days ago, intermittent pressure.\n- Dyspnea / Breathlessness: Present on exertion.\n\n**3. PAST MEDICAL HISTORY:**\n- Type 2 Diabetes Mellitus [DOCUMENTED - Apollo Hospital 2024]\n- Essential Hypertension [DOCUMENTED - Apollo Hospital 2025]\n\n**4. MEDICATIONS & ADHERENCE:**\n- Tab. Metformin 500mg BD [DOCUMENTED - Active]\n- Tab. Amlodipine 5mg OD [DOCUMENTED - Active]\n- Tab. Ecosprin 75mg OD [🚨 CONFLICT: Documented Active vs Patient reports stopped 2 months ago]\n\n**5. ALLERGIES:**\n- Penicillin [DOCUMENTED - Severe hypersensitivity / cutaneous reaction]\n\n**6. SAFETY RED FLAGS & DISCREPANCIES:**\n- 🚨 Potential Red Flag: Acute chest pain + breathlessness cluster. Immediate 12-lead ECG recommended.\n- 🚨 Medication Conflict: Unsupervised Aspirin cessation in diabetic patient with chest discomfort.`,
+    ai_summary_draft: `### PATIENT CASE SUMMARY DRAFT\n*NOTICE: AI-generated clinical draft — requires clinician verification. Not a diagnosis.*\n\n**PATIENT:** Rahul Kumar | **AGE/SEX:** 58Y Male | **ID:** PAT-2026-0891 | **ABHA:** 91-8273-9912-0041\n\n---\n\n**1. CHIEF COMPLAINT:**\nCentral retrosternal chest pain for 3 days, accompanied by intermittent breathlessness on mild exertion.\n\n**2. CURRENT HISTORY & SYMPTOMS:**\n- Chest Pain: Moderate-Severe, onset 3 days ago, intermittent pressure.\n- Dyspnea / Breathlessness: Present on exertion. Pain does not radiate to left arm.\n\n**3. PAST MEDICAL HISTORY:**\n- Type 2 Diabetes Mellitus [DOCUMENTED - Apollo Hospital 2024]\n- Essential Hypertension [DOCUMENTED - Apollo Hospital 2025]\n\n**4. MEDICATIONS & ADHERENCE:**\n- Tab. Metformin 500mg BD [DOCUMENTED - Active]\n- Tab. Amlodipine 5mg OD [DOCUMENTED - Active]\n- Tab. Ecosprin 75mg OD [🚨 CONFLICT: Documented Active vs Patient reports stopped 2 months ago]\n\n**5. ALLERGIES:**\n- Penicillin [DOCUMENTED - Severe cutaneous hypersensitivity]\n\n**6. SAFETY RED FLAGS & RECONCILIATION:**\n- 🚨 Acute Chest Pain + Breathlessness cluster detected in diabetic patient with recent aspirin cessation. Immediate 12-lead ECG recommended.`,
     doctor_notes: '',
     doctor_verified: false,
+    patient_confirmed: true,
+    patient_confirmed_at: new Date().toISOString(),
     created_at: new Date().toISOString()
   });
 
@@ -57,8 +66,8 @@ function MainApp() {
       key_name: 'Chief Complaint',
       value: 'Central chest pain for 3 days with breathlessness',
       status: 'CONFIRMED',
-      source_citation: "Voice Transcript: 'I've been having chest pain for three days. Sometimes I feel breathless.'",
-      confidence: 0.96,
+      source_citation: "Voice Transcript: 'I stopped taking aspirin two months ago and I have had chest pain for three days.'",
+      confidence: 0.98,
       doctor_verified: false,
       created_at: new Date().toISOString()
     },
@@ -66,11 +75,11 @@ function MainApp() {
       id: 'f2',
       patient_id: 'pat_rahul_01',
       category: 'symptom',
-      key_name: 'Chest Pain',
-      value: 'Moderate to severe substernal pressure, intermittent',
+      key_name: 'Chest Pain Duration & Severity',
+      value: 'Moderate to severe substernal pressure, onset 18-Sep-2026',
       status: 'CONFIRMED',
-      source_citation: "Voice Transcript: 'I've been having chest pain for three days'",
-      confidence: 0.95,
+      source_citation: "Voice Transcript: 'Chest pain for three days'",
+      confidence: 0.96,
       doctor_verified: false,
       created_at: new Date().toISOString()
     },
@@ -78,11 +87,11 @@ function MainApp() {
       id: 'f3',
       patient_id: 'pat_rahul_01',
       category: 'symptom',
-      key_name: 'Breathlessness',
-      value: 'Intermittent dyspnea on mild physical exertion',
+      key_name: 'Exertional Dyspnea',
+      value: 'Intermittent breathlessness on mild exertion (climbing stairs)',
       status: 'CONFIRMED',
       source_citation: "Voice Transcript: 'Sometimes I feel breathless'",
-      confidence: 0.94,
+      confidence: 0.95,
       doctor_verified: false,
       created_at: new Date().toISOString()
     },
@@ -95,7 +104,7 @@ function MainApp() {
       status: 'DOCUMENTED',
       source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
       confidence: 0.99,
-      doctor_verified: false,
+      doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
@@ -107,7 +116,7 @@ function MainApp() {
       status: 'DOCUMENTED',
       source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
       confidence: 0.97,
-      doctor_verified: false,
+      doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
@@ -117,9 +126,9 @@ function MainApp() {
       key_name: 'Penicillin Allergy',
       value: 'Severe cutaneous hypersensitivity / rash',
       status: 'DOCUMENTED',
-      source_citation: 'Prior Medical Record / Rx (14-Aug-2026)',
-      confidence: 0.96,
-      doctor_verified: false,
+      source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
+      confidence: 0.98,
+      doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
@@ -131,7 +140,7 @@ function MainApp() {
       status: 'DOCUMENTED',
       source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
       confidence: 0.98,
-      doctor_verified: false,
+      doctor_verified: true,
       created_at: new Date().toISOString()
     },
     {
@@ -139,10 +148,10 @@ function MainApp() {
       patient_id: 'pat_rahul_01',
       category: 'medication',
       key_name: 'Amlodipine Dosage',
-      value: 'Tab. Amlodipine 5mg? (Morning) — Low OCR clarity',
-      status: 'UNCERTAIN',
-      source_citation: 'OCR scan region with 72% confidence',
-      confidence: 0.72,
+      value: 'Tab. Amlodipine 5mg (Morning) — Clear prescription entry',
+      status: 'DOCUMENTED',
+      source_citation: 'Apollo Hospital Prescription (14-Aug-2026)',
+      confidence: 0.96,
       doctor_verified: false,
       created_at: new Date().toISOString()
     },
@@ -150,11 +159,11 @@ function MainApp() {
       id: 'f9',
       patient_id: 'pat_rahul_01',
       category: 'medication',
-      key_name: 'Aspirin 75mg Active Status',
+      key_name: 'Aspirin (Ecosprin 75mg) Discrepancy',
       value: 'Prescription lists Ecosprin 75mg ACTIVE vs Patient reports STOPPED 2 months ago',
       status: 'CONFLICTING',
-      source_citation: 'Discrepancy between Apollo Rx 14-Aug-2026 and Spoken Intake 21-Sep-2026',
-      confidence: 0.94,
+      source_citation: 'Discrepancy: Apollo Rx (14-Aug-2026) vs Spoken Intake (21-Sep-2026)',
+      confidence: 0.95,
       doctor_verified: false,
       created_at: new Date().toISOString()
     }
@@ -183,7 +192,7 @@ function MainApp() {
       severity: 'HIGH',
       title: 'Cardiopulmonary Red Flag: Chest Pain + Breathlessness',
       trigger_criteria: 'Substernal chest discomfort for 3 days with concurrent dyspnea in a known diabetic/hypertensive patient with recent aspirin discontinuation.',
-      recommendation: 'Potential red flag detected — urgent clinician review and 12-lead ECG evaluation recommended.',
+      recommendation: 'Urgent clinician review and 12-lead ECG evaluation recommended.',
       status: 'UNACKNOWLEDGED',
       created_at: new Date().toISOString()
     }
@@ -234,7 +243,7 @@ function MainApp() {
       event_description: 'Self-reported stoppage due to mild gastric irritation without physician consult.',
       source_type: 'voice_intake',
       status: 'CONFLICTING',
-      confidence: 0.94,
+      confidence: 0.95,
       sort_order: 4,
       created_at: new Date().toISOString()
     },
@@ -246,14 +255,14 @@ function MainApp() {
       event_description: 'Substernal chest pain and shortness of breath on exertion.',
       source_type: 'voice_intake',
       status: 'CONFIRMED',
-      confidence: 0.95,
+      confidence: 0.96,
       sort_order: 5,
       created_at: new Date().toISOString()
     },
     {
       id: 't6',
       patient_id: 'pat_rahul_01',
-      event_date: 'Today',
+      event_date: 'Today (21-Sep-2026)',
       event_title: 'Current Consultation & Smart Intake',
       event_description: 'Voice case taking completed. 12 questions avoided using known history. Red flags active.',
       source_type: 'doctor_note',
@@ -264,30 +273,25 @@ function MainApp() {
     }
   ]);
 
-  // Adaptive Question State
   const [currentAdaptiveQuestion, setCurrentAdaptiveQuestion] = useState(
     'Does the pain spread or radiate to your left arm, shoulder, jaw, neck, or upper back?'
   );
-  const [avoidedReasons, setAvoidedReasons] = useState<string[]>([
+
+  const avoidedReasons = [
     "✓ 'Do you have diabetes?' skipped — Already confirmed from previous records (Type 2 Diabetes Mellitus)",
     "✓ 'Do you have high blood pressure?' skipped — Already documented in records (Essential Hypertension)",
     "✓ 'Do you have known drug allergies?' streamlined — Documented Penicillin allergy found"
-  ]);
-
-  const handleLoadDemoPatient = () => {
-    switchRole('doctor');
-  };
+  ];
 
   const handleVoiceProcess = (transcript: string) => {
     setLoadingVoice(true);
     setTimeout(() => {
       setLoadingVoice(false);
       setPatientStep(4);
-    }, 800);
+    }, 600);
   };
 
   const handleAnswerSubmit = (answer: string) => {
-    // Add answer to facts
     const newFact: ClinicalFact = {
       id: `f_${Date.now()}`,
       patient_id: currentPatient.id,
@@ -314,7 +318,14 @@ function MainApp() {
             doctor_action: action,
             doctor_notes: notes,
             value: editedValue || f.value,
-            status: action === 'confirmed' ? 'CONFIRMED' : action === 'marked_uncertain' ? 'UNCERTAIN' : action === 'rejected' ? 'REJECTED' : 'CONFIRMED'
+            status:
+              action === 'confirmed'
+                ? 'CONFIRMED'
+                : action === 'marked_uncertain'
+                ? 'UNCERTAIN'
+                : action === 'rejected'
+                ? 'REJECTED'
+                : 'CONFIRMED'
           };
         }
         return f;
@@ -344,141 +355,216 @@ function MainApp() {
     alert('Case successfully verified and finalized by Dr. Priya Sharma!');
   };
 
+  const handleLoadDemoPatient = () => {
+    switchRole('doctor');
+    setActiveView('app');
+  };
+
   return (
-    <div className="page-container min-h-screen bg-[#0b0f19] text-slate-100 relative overflow-x-hidden">
-      {/* React Bits Plasma Background */}
-      <div className="plasma-background fixed inset-0 z-0 pointer-events-none opacity-40">
-        <Plasma
-          color="#0284c7"
-          speed={0.6}
-          direction="forward"
-          scale={1.1}
-          opacity={0.35}
-          mouseInteractive={true}
-          renderScale={0.55}
-          maxDpr={1.5}
-          targetFps={60}
-          iterations={60}
-        />
-      </div>
+    <div className="min-h-screen bg-[#fef9ef] text-[#2a2b2f] flex flex-col font-sans selection:bg-[#faede8] selection:text-[#b05a36]">
+      {/* Editorial Navbar */}
+      <Navbar
+        onLoadDemo={handleLoadDemoPatient}
+        activeView={activeView}
+        onNavigate={(view) => {
+          setActiveView(view);
+        }}
+      />
 
-      <div className="website-content relative z-10 flex flex-col min-h-screen">
-        <Navbar onLoadDemo={handleLoadDemoPatient} />
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* View 1: Public Landing Page */}
+        {activeView === 'landing' && (
+          <LandingPage
+            onStartIntake={() => {
+              switchRole('patient');
+              setPatientStep(1);
+              setActiveView('app');
+            }}
+            onDoctorLogin={() => {
+              switchRole('doctor');
+              setActiveView('app');
+            }}
+            onStaffLogin={() => {
+              switchRole('staff');
+              setActiveView('app');
+            }}
+            onViewPrivacy={() => {
+              setActiveView('privacy');
+            }}
+          />
+        )}
 
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Patient Role Views */}
-          {role === 'patient' && (
-            <div className="space-y-6">
-              {/* Stepper Header */}
-              <div className="max-w-2xl mx-auto flex items-center justify-between text-xs font-semibold text-slate-400 mb-4 px-2">
-                <span className={patientStep >= 1 ? 'text-cyan-400 font-bold' : ''}>1. Registration</span>
-                <span>→</span>
-                <span className={patientStep >= 2 ? 'text-cyan-400 font-bold' : ''}>2. Consent</span>
-                <span>→</span>
-                <span className={patientStep >= 3 ? 'text-cyan-400 font-bold' : ''}>3. Spoken Intake</span>
-                <span>→</span>
-                <span className={patientStep >= 4 ? 'text-cyan-400 font-bold' : ''}>4. Adaptive Q&A</span>
-                <span>→</span>
-                <span className={patientStep >= 5 ? 'text-cyan-400 font-bold' : ''}>5. OCR Upload</span>
-                <span>→</span>
-                <span className={patientStep >= 6 ? 'text-cyan-400 font-bold' : ''}>6. Self-Review</span>
+        {/* View 2: Healthcare Privacy Policy */}
+        {activeView === 'privacy' && (
+          <PrivacyPolicyPage onBack={() => setActiveView('landing')} />
+        )}
+
+        {/* View 3: Custom 404 Page */}
+        {activeView === '404' && (
+          <NotFoundPage
+            onGoHome={() => setActiveView('landing')}
+            onViewFeatures={() => setActiveView('landing')}
+            onContactSupport={() => setActiveView('privacy')}
+          />
+        )}
+
+        {/* View 4: Clinical App Stations */}
+        {activeView === 'app' && (
+          <>
+            {/* Patient Role Workflow */}
+            {role === 'patient' && (
+              <div className="space-y-6">
+                {/* Stepper Header */}
+                <div className="max-w-2xl mx-auto flex items-center justify-between text-xs font-semibold text-ink-graphite mb-2 px-2">
+                  <span className={patientStep >= 1 ? 'text-terracotta font-bold' : ''}>1. Registration</span>
+                  <span>→</span>
+                  <span className={patientStep >= 2 ? 'text-terracotta font-bold' : ''}>2. Consent</span>
+                  <span>→</span>
+                  <span className={patientStep >= 3 ? 'text-terracotta font-bold' : ''}>3. Voice Intake</span>
+                  <span>→</span>
+                  <span className={patientStep >= 4 ? 'text-terracotta font-bold' : ''}>4. Adaptive Q&A</span>
+                  <span>→</span>
+                  <span className={patientStep >= 5 ? 'text-terracotta font-bold' : ''}>5. OCR Upload</span>
+                  <span>→</span>
+                  <span className={patientStep >= 6 ? 'text-terracotta font-bold' : ''}>6. Self-Review</span>
+                </div>
+
+                {patientStep === 1 && (
+                  <PatientRegistration
+                    onPatientCreated={(p) => {
+                      setCurrentPatient(p);
+                      setPatientStep(2);
+                    }}
+                    onSelectDemoPatient={() => {
+                      setPatientStep(2);
+                    }}
+                  />
+                )}
+
+                {patientStep === 2 && (
+                  <ConsentScreen
+                    patient={currentPatient}
+                    onConsentGiven={() => setPatientStep(3)}
+                    onDecline={() => setPatientStep(1)}
+                    onBack={() => setPatientStep(1)}
+                  />
+                )}
+
+                {patientStep === 3 && (
+                  <CaseTakingVoice
+                    onProcessTranscript={handleVoiceProcess}
+                    loading={loadingVoice}
+                  />
+                )}
+
+                {patientStep === 4 && (
+                  <AdaptiveQuestionnaire
+                    currentQuestion={currentAdaptiveQuestion}
+                    category="symptom_detail"
+                    avoidedReasons={avoidedReasons}
+                    avoidedCount={12}
+                    onAnswerSubmit={handleAnswerSubmit}
+                    onFinishCase={() => setPatientStep(5)}
+                    isComplete={!currentAdaptiveQuestion}
+                  />
+                )}
+
+                {patientStep === 5 && (
+                  <DocumentUpload
+                    onDocumentProcessed={() => {}}
+                    onProceedToDoctor={() => setPatientStep(6)}
+                  />
+                )}
+
+                {patientStep === 6 && (
+                  <PatientCorrectionScreen
+                    visitId={currentVisit.id}
+                    patientName={currentPatient.name}
+                    onDone={() => {
+                      switchRole('doctor');
+                    }}
+                  />
+                )}
               </div>
+            )}
 
-              {patientStep === 1 && (
-                <PatientRegistration
-                  onPatientCreated={(p) => {
-                    setCurrentPatient(p);
-                    setPatientStep(2);
-                  }}
-                  onSelectDemoPatient={() => {
-                    setPatientStep(2);
-                  }}
-                />
-              )}
+            {/* Doctor Role Workstation */}
+            {role === 'doctor' && (
+              <DoctorDashboard
+                patient={currentPatient}
+                visit={currentVisit}
+                facts={facts}
+                contradictions={contradictions}
+                redFlags={redFlags}
+                timelineEvents={timelineEvents}
+                onFactVerify={handleFactVerify}
+                onContradictionResolve={handleContradictionResolve}
+                onRedFlagAction={handleRedFlagAction}
+                onFinalizeCase={handleFinalizeCase}
+              />
+            )}
 
-              {patientStep === 2 && (
-                <ConsentScreen
-                  patient={currentPatient}
-                  onConsentGiven={() => setPatientStep(3)}
-                  onDecline={() => setPatientStep(1)}
-                  onBack={() => setPatientStep(1)}
-                />
-              )}
+            {/* Hospital Staff & Triage Desk */}
+            {role === 'staff' && (
+              <StaffDashboard
+                onSelectPatient={(p) => {
+                  setCurrentPatient(p);
+                  switchRole('doctor');
+                }}
+                onNewPatient={() => {
+                  switchRole('patient');
+                  setPatientStep(1);
+                }}
+              />
+            )}
 
-              {patientStep === 3 && (
-                <CaseTakingVoice
-                  onProcessTranscript={handleVoiceProcess}
-                  loading={loadingVoice}
-                />
-              )}
+            {/* Hospital Admin Console */}
+            {role === 'admin' && (
+              <AdminDashboard
+                onSwitchToDoctor={() => {
+                  switchRole('doctor');
+                }}
+                onSwitchToPatient={() => {
+                  switchRole('patient');
+                  setPatientStep(1);
+                }}
+              />
+            )}
+          </>
+        )}
+      </main>
 
-              {patientStep === 4 && (
-                <AdaptiveQuestionnaire
-                  currentQuestion={currentAdaptiveQuestion}
-                  category="symptom_detail"
-                  avoidedReasons={avoidedReasons}
-                  avoidedCount={12}
-                  onAnswerSubmit={handleAnswerSubmit}
-                  onFinishCase={() => setPatientStep(5)}
-                  isComplete={!currentAdaptiveQuestion}
-                />
-              )}
-
-              {patientStep === 5 && (
-                <DocumentUpload
-                  onDocumentProcessed={() => {}}
-                  onProceedToDoctor={() => setPatientStep(6)}
-                />
-              )}
-
-              {patientStep === 6 && (
-                <PatientCorrectionScreen
-                  visitId={currentVisit.id}
-                  patientName={currentPatient.name}
-                  onDone={() => switchRole('doctor')}
-                />
-              )}
-            </div>
-          )}
-
-          {/* Doctor Role View */}
-          {role === 'doctor' && (
-            <DoctorDashboard
-              patient={currentPatient}
-              visit={currentVisit}
-              facts={facts}
-              contradictions={contradictions}
-              redFlags={redFlags}
-              timelineEvents={timelineEvents}
-              onFactVerify={handleFactVerify}
-              onContradictionResolve={handleContradictionResolve}
-              onRedFlagAction={handleRedFlagAction}
-              onFinalizeCase={handleFinalizeCase}
-            />
-          )}
-
-          {/* Hospital Staff Role View */}
-          {role === 'staff' && (
-            <StaffDashboard
-              onSelectPatient={(p) => {
-                setCurrentPatient(p);
-                switchRole('doctor');
-              }}
-              onNewPatient={() => {
-                switchRole('patient');
-                setPatientStep(1);
-              }}
-            />
-          )}
-        </main>
-
-        <footer className="relative z-10 glass-panel border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
-          <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
-            <span>Patient Story Engine • Evidence-Linked AI Healthcare Assistant</span>
-            <span>Non-Diagnostic Clinical Decision Support Architecture • Built for Indian Hospitals</span>
+      {/* Warm Parchment Footer */}
+      <footer className="bg-[#f5eee1] border-t border-parchment-400 py-6 text-center text-xs text-ink-graphite">
+        <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="font-serif font-bold text-ink">Pranabyte</span>
+            <span>•</span>
+            <span>Evidence-Linked AI Clinical Case Intake</span>
           </div>
-        </footer>
-      </div>
+
+          <div className="flex items-center gap-4 text-[11px]">
+            <button
+              type="button"
+              onClick={() => setActiveView('privacy')}
+              className="hover:text-ink hover:underline font-semibold"
+            >
+              Privacy Policy & Data Rights
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => setActiveView('landing')}
+              className="hover:text-ink hover:underline font-semibold"
+            >
+              System Overview
+            </button>
+            <span>•</span>
+            <span>Non-Diagnostic Clinical Decision Support</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

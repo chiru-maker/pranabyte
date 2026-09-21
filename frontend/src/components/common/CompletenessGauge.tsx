@@ -1,72 +1,115 @@
 import React from 'react';
-import { CheckCircle2, Circle, HelpCircle } from 'lucide-react';
+import { Activity, HelpCircle, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 interface CompletenessGaugeProps {
   score: number;
-  factsCount?: number;
+  missingFields?: string[];
   avoidedCount?: number;
+  onAskPatientNow?: (field: string) => void;
 }
 
 export const CompletenessGauge: React.FC<CompletenessGaugeProps> = ({
-  score = 85,
-  factsCount = 8,
-  avoidedCount = 12
+  score,
+  missingFields = ['Radiation / Spread of pain', 'Dosage clarification for Amlodipine'],
+  avoidedCount = 12,
+  onAskPatientNow
 }) => {
-  const collectedItems = [
-    { label: 'Chief Complaint', present: true },
-    { label: 'Symptom Duration & Severity', present: true },
-    { label: 'Current & Past Medications', present: true },
-    { label: 'Drug Allergies', present: true },
-    { label: 'Documented Past Medical History', present: true },
-    { label: 'Family Cardiac History', present: score > 80 },
-    { label: 'Social & Tobacco History', present: score >= 90 },
-  ];
+  // SVG Circular progress math
+  const radius = 32;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
+
+  const getScoreColor = () => {
+    if (score >= 80) return '#15803d'; // Forest Green
+    if (score >= 50) return '#b05a36'; // Terracotta
+    return '#b91c1c'; // Crimson
+  };
 
   return (
-    <div className="glass-card rounded-xl p-4 border border-slate-800">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Case Intake Completeness</span>
-          <p className="text-xs text-slate-500">Measures clinical data completeness (Not a clinical risk score)</p>
+    <div className="paper-card p-5 space-y-4">
+      <div className="flex items-center justify-between border-b border-parchment-400 pb-3">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-terracotta" />
+          <h3 className="font-serif font-bold text-ink text-sm">
+            Case Completeness Engine
+          </h3>
         </div>
-        <div className="text-right">
-          <span className="text-2xl font-black text-cyan-400">{score}%</span>
-        </div>
+        <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#dcfce7] text-[#15803d] border border-[#86efac]">
+          {avoidedCount} Redundant Qs Avoided
+        </span>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full bg-slate-800 rounded-full h-2.5 mb-3 overflow-hidden">
-        <div 
-          className="bg-gradient-to-r from-sky-500 to-cyan-400 h-2.5 rounded-full transition-all duration-700 ease-out" 
-          style={{ width: `${score}%` }}
-        />
-      </div>
-
-      {/* Checklist items */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-        {collectedItems.map((item, idx) => (
-          <div key={idx} className="flex items-center gap-2">
-            {item.present ? (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            ) : (
-              <Circle className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-            )}
-            <span className={item.present ? 'text-slate-300' : 'text-slate-500'}>
-              {item.label}
+      <div className="flex items-center gap-5">
+        {/* Circular Gauge */}
+        <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
+            {/* Background circle */}
+            <circle
+              cx="40"
+              cy="40"
+              r={radius}
+              stroke="#d1c9bf"
+              strokeWidth="6"
+              fill="transparent"
+            />
+            {/* Progress circle */}
+            <circle
+              cx="40"
+              cy="40"
+              r={radius}
+              stroke={getScoreColor()}
+              strokeWidth="6"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="transparent"
+              className="transition-all duration-700 ease-out"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="font-serif text-lg font-bold text-ink leading-none">
+              {score}%
+            </span>
+            <span className="text-[9px] uppercase font-bold text-ink-graphite tracking-tight">
+              Complete
             </span>
           </div>
-        ))}
-      </div>
-
-      {avoidedCount > 0 && (
-        <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-sky-400 font-medium bg-sky-950/30 -mx-4 -mb-4 p-3 rounded-b-xl">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-            {avoidedCount} redundant questions skipped using prior records
-          </span>
-          <span className="text-sky-300 font-bold">Ask Less, Know More</span>
         </div>
-      )}
+
+        {/* Missing Fields Breakdown */}
+        <div className="flex-1 space-y-2">
+          <span className="text-xs font-bold text-ink block">
+            {missingFields.length > 0 ? 'Missing Diagnostic Detail:' : 'Case History Fully Detailed'}
+          </span>
+          {missingFields.length > 0 ? (
+            <div className="space-y-1.5">
+              {missingFields.map((field, idx) => (
+                <div key={idx} className="flex items-center justify-between text-xs text-ink-charcoal gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-terracotta shrink-0" />
+                    <span>{field}</span>
+                  </div>
+                  {onAskPatientNow && (
+                    <button
+                      type="button"
+                      onClick={() => onAskPatientNow(field)}
+                      className="text-[11px] text-terracotta font-semibold hover:underline flex items-center gap-0.5 shrink-0"
+                    >
+                      <span>Ask Patient Now</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-xs text-[#15803d] flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>All essential clinical dimensions covered.</span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

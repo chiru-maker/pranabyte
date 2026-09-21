@@ -1,52 +1,57 @@
 import React from 'react';
 import { FactStatus } from '../../types';
-import { CheckCircle2, FileText, AlertTriangle, AlertOctagon, HelpCircle } from 'lucide-react';
+import { CheckCircle2, FileText, AlertCircle, AlertTriangle, XCircle } from 'lucide-react';
 
 interface BadgeProps {
   status: FactStatus;
-  confidence?: number;
-  className?: string;
   showIcon?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const StatusBadge: React.FC<BadgeProps> = ({ status, confidence, className = '', showIcon = true }) => {
+export const Badge: React.FC<BadgeProps> = ({ status, showIcon = true, size = 'md' }) => {
+  const sizeClasses = {
+    sm: 'px-2 py-0.5 text-[10px]',
+    md: 'px-2.5 py-1 text-xs',
+    lg: 'px-3 py-1.5 text-sm font-semibold'
+  };
+
   switch (status) {
     case 'CONFIRMED':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 ${className}`}>
-          {showIcon && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-[#dcfce7] text-[#15803d] border border-[#86efac] ${sizeClasses[size]}`}>
+          {showIcon && <CheckCircle2 className="w-3.5 h-3.5" />}
           <span>CONFIRMED</span>
-          {confidence && <span className="opacity-75">({Math.round(confidence * 100)}%)</span>}
         </span>
       );
     case 'DOCUMENTED':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-950/80 text-sky-400 border border-sky-500/30 ${className}`}>
-          {showIcon && <FileText className="w-3.5 h-3.5 text-sky-400" />}
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-[#dbeafe] text-[#1e40af] border border-[#93c5fd] ${sizeClasses[size]}`}>
+          {showIcon && <FileText className="w-3.5 h-3.5" />}
           <span>DOCUMENTED</span>
-          {confidence && <span className="opacity-75">({Math.round(confidence * 100)}%)</span>}
         </span>
       );
     case 'UNCERTAIN':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-950/80 text-amber-400 border border-amber-500/30 ${className}`}>
-          {showIcon && <HelpCircle className="w-3.5 h-3.5 text-amber-400" />}
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-[#fef3c7] text-[#b45309] border border-[#fde68a] ${sizeClasses[size]}`}>
+          {showIcon && <AlertCircle className="w-3.5 h-3.5" />}
           <span>UNCERTAIN</span>
-          {confidence && <span className="opacity-75">({Math.round(confidence * 100)}%)</span>}
         </span>
       );
     case 'CONFLICTING':
       return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-950/90 text-rose-400 border border-rose-500/40 animate-pulse ${className}`}>
-          {showIcon && <AlertOctagon className="w-3.5 h-3.5 text-rose-400" />}
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5] animate-pulse ${sizeClasses[size]}`}>
+          {showIcon && <AlertTriangle className="w-3.5 h-3.5" />}
           <span>CONFLICTING</span>
         </span>
       );
-    default:
+    case 'REJECTED':
       return (
-        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700 ${className}`}>
-          <span>{status}</span>
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-parchment-300 text-ink-muted border border-parchment-400 line-through ${sizeClasses[size]}`}>
+          {showIcon && <XCircle className="w-3.5 h-3.5" />}
+          <span>REJECTED</span>
         </span>
       );
+    default:
+      return null;
   }
 };

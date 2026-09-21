@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Modal } from '../ui/Modal';
-import { Patient, Visit, ClinicalFact } from '../../types';
-import { Download, Copy, Check, FileCode, ShieldCheck } from 'lucide-react';
+import { FileCode, Download, Copy, Check, CheckCircle2 } from 'lucide-react';
+import { Visit, Patient, ClinicalFact } from '../../types';
 
 interface FhirExportModalProps {
   isOpen: boolean;
@@ -18,15 +17,16 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({
   visit,
   facts
 }) => {
-  const [copied, setCopied] = useState(false);
+  if (!isOpen) return null;
+
+  const [isCopied, setIsCopied] = useState(false);
 
   // Generate FHIR R4 Bundle JSON
   const fhirBundle = {
     resourceType: "Bundle",
-    id: `bundle-patient-${patient.patient_id_display}`,
+    id: `bundle-${visit.id}`,
     type: "document",
     timestamp: new Date().toISOString(),
-    total: facts.length + 2,
     entry: [
       {
         fullUrl: `urn:uuid:${patient.id}`,
@@ -34,19 +34,12 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({
           resourceType: "Patient",
           id: patient.id,
           identifier: [
-            {
-              system: "https://healthid.ndhm.gov.in",
-              value: patient.abha_id || "DEMO-ABHA-91-8273-9912-0041"
-            },
-            {
-              system: "urn:hospital:patient-id",
-              value: patient.patient_id_display
-            }
+            { system: "https://healthid.ndhm.gov.in", value: patient.abha_id || "91-8273-9912-0041" },
+            { system: "hospital:patient_id", value: patient.patient_id_display }
           ],
-          active: true,
           name: [{ text: patient.name, family: patient.name.split(' ').slice(1).join(' '), given: [patient.name.split(' ')[0]] }],
           gender: patient.sex.toLowerCase(),
-          telecom: [{ system: "phone", value: patient.phone, use: "mobile" }]
+          telecom: [{ system: "phone", value: patient.phone }]
         }
       },
       {
@@ -54,14 +47,9 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({
         resource: {
           resourceType: "Encounter",
           id: visit.id,
-          status: visit.doctor_verified ? "finished" : "in-progress",
-          class: {
-            system: "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-            code: "AMB",
-            display: "ambulatory"
-          },
-          subject: { reference: `urn:uuid:${patient.id}`, display: patient.name },
-          reasonCode: [{ text: visit.chief_complaint || "Cardiopulmonary Evaluation" }]
+          status: "finished",
+          class: { system: "http://terminology.hl7.org/CodeSystem/v3-ActCode", code: "AMB", display: "ambulatory" },
+          subject: { reference: `urn:uuid:${patient.id}`, display: patient.name }
         }
       },
       ...facts.map((fact) => ({
@@ -69,18 +57,12 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({
         resource: {
           resourceType: fact.category === 'medication' ? "MedicationStatement" : fact.category === 'allergy' ? "AllergyIntolerance" : "Condition",
           id: fact.id,
-          clinicalStatus: {
-            coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-clinical", code: "active" }]
-          },
+          status: fact.doctor_verified ? "active" : "unconfirmed",
+          code: { text: fact.key_name },
+          note: [{ text: fact.value }],
           verificationStatus: {
-            coding: [{
-              system: "http://terminology.hl7.org/CodeSystem/condition-ver-status",
-              code: fact.status === 'CONFIRMED' || fact.doctor_verified ? "confirmed" : "provisional"
-            }]
-          },
-          code: { text: `${fact.key_name}: ${fact.value}` },
-          subject: { reference: `urn:uuid:${patient.id}` },
-          note: [{ text: `Evidence Status: ${fact.status} | Provenance: ${fact.source_citation || 'Consultation intake'}` }]
+            coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-ver-status", code: fact.doctor_verified ? "confirmed" : "unconfirmed" }]
+          }
         }
       }))
     ]
@@ -90,8 +72,8 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({
 
   const handleCopy = () => {
     navigator.clipboard.writeText(jsonString);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const handleDownload = () => {
@@ -99,67 +81,70 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `FHIR_Bundle_${patient.patient_id_display}.json`;
+    a.download = `FHIR_R4_Bundle_${patient.patient_id_display}_${visit.visit_number}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="HL7 FHIR R4 Bundle Export (ABDM Architecture Ready)"
-      maxWidth="max-w-3xl"
-    >
-      <div className="space-y-4 text-xs">
-        <div className="p-3.5 rounded-xl bg-sky-950/60 border border-sky-500/40 text-sky-200 flex items-start gap-2.5">
-          <ShieldCheck className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
-          <div>
-            <span className="font-bold text-white block">Standardized Interoperability</span>
-            Structured internal patient story mapped into HL7 FHIR R4 resources (`Patient`, `Encounter`, `Condition`, `MedicationStatement`, `AllergyIntolerance`) with evidence annotations.
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fadeIn">
+      <div className="max-w-3xl w-full paper-card p-6 sm:p-8 max-h-[90vh] flex flex-col space-y-4 shadow-warm-xl border border-parchment-400">
+        <div className="flex items-center justify-between border-b border-parchment-400 pb-3">
+          <div className="flex items-center gap-2">
+            <FileCode className="w-5 h-5 text-terracotta" />
+            <div>
+              <h2 className="font-serif font-bold text-ink text-lg">
+                HL7 FHIR R4 Clinical Bundle Export
+              </h2>
+              <span className="text-[11px] font-mono text-ink-graphite">
+                ABDM / ABDC Health Data Interoperability Standard
+              </span>
+            </div>
           </div>
-        </div>
-
-        {/* JSON Display */}
-        <div className="relative">
-          <pre className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-cyan-300 font-mono text-[11px] overflow-x-auto max-h-96 leading-relaxed">
-            {jsonString}
-          </pre>
           <button
             type="button"
-            onClick={handleCopy}
-            className="absolute top-3 right-3 p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1"
+            onClick={onClose}
+            className="text-ink-graphite hover:text-ink font-bold text-lg"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            ✕
           </button>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-          <span className="text-slate-400 font-mono">
-            {fhirBundle.entry.length} FHIR Resources Generated
-          </span>
+        <div className="flex-1 overflow-y-auto p-4 rounded-2xl bg-parchment border border-parchment-400 text-xs">
+          <pre className="font-mono text-[11px] text-ink whitespace-pre-wrap leading-relaxed">
+            {jsonString}
+          </pre>
+        </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-parchment-400">
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs"
+              onClick={handleCopy}
+              className="btn-secondary-paper text-xs px-3 py-1.5"
             >
-              Close
+              {isCopied ? <Check className="w-3.5 h-3.5 text-[#15803d]" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{isCopied ? 'Copied!' : 'Copy JSON'}</span>
             </button>
             <button
               type="button"
               onClick={handleDownload}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-semibold text-xs shadow-lg shadow-cyan-600/30 flex items-center gap-1.5"
+              className="btn-terracotta text-xs px-4 py-1.5"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download FHIR Bundle (.json)</span>
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary-paper text-xs px-4 py-1.5"
+          >
+            Close
+          </button>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 };

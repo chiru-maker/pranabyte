@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Users, Clock, AlertTriangle, AlertOctagon, CheckCircle2, UserPlus, Eye, ArrowRight, Search } from 'lucide-react';
 import { Patient } from '../../types';
-import { SpeechToText } from '../SpeechToText';
+import { Users, Search, Plus, Activity, Heart, ArrowRight, UserPlus, Sparkles, FileText, CheckCircle2 } from 'lucide-react';
 
 interface StaffDashboardProps {
   onSelectPatient: (patient: Patient) => void;
@@ -12,163 +11,156 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
   onSelectPatient,
   onNewPatient
 }) => {
-  const stats = [
-    { label: 'Waiting Patients', count: 7, color: 'text-sky-400', bg: 'bg-sky-950/60', border: 'border-sky-500/40', icon: Clock },
-    { label: 'Ready for Doctor', count: 4, color: 'text-emerald-400', bg: 'bg-emerald-950/60', border: 'border-emerald-500/40', icon: CheckCircle2 },
-    { label: 'Requires Verification', count: 2, color: 'text-amber-400', bg: 'bg-amber-950/60', border: 'border-amber-500/40', icon: AlertTriangle },
-    { label: 'Red-Flag Alert Cases', count: 1, color: 'text-rose-400', bg: 'bg-rose-950/60', border: 'border-rose-500/40', icon: AlertOctagon },
-  ];
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const queuePatients = [
-    { id: 'pat_01', name: 'Rahul Kumar', age: 58, sex: 'Male', status: 'RED FLAG ALERT', complaint: 'Chest pain + Breathlessness for 3 days', time: '10:42 AM', isDemo: true },
-    { id: 'pat_02', name: 'Meenakshi Sundaram', age: 64, sex: 'Female', status: 'Ready for Doctor', complaint: 'Follow up for Diabetic Retinopathy review', time: '10:50 AM', isDemo: false },
-    { id: 'pat_03', name: 'Siddharth Varma', age: 34, sex: 'Male', status: 'Requires Verification', complaint: 'Uncertain penicillin allergy declaration', time: '11:05 AM', isDemo: false },
-    { id: 'pat_04', name: 'Kavita Joshi', age: 49, sex: 'Female', status: 'Waiting Intake', complaint: 'Mild hypertension checkup', time: '11:15 AM', isDemo: false },
-  ];
+  const [queuePatients] = useState<Patient[]>([
+    {
+      id: 'pat_rahul_01',
+      patient_id_display: 'PAT-2026-0891',
+      name: 'Rahul Kumar',
+      age: 58,
+      sex: 'Male',
+      phone: '+91 98765 43210',
+      abha_id: '91-8273-9912-0041',
+      is_existing: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'pat_sunita_02',
+      patient_id_display: 'PAT-2026-0892',
+      name: 'Sunita Devi',
+      age: 46,
+      sex: 'Female',
+      phone: '+91 94512 88321',
+      abha_id: '91-4412-3321-9988',
+      is_existing: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'pat_manjunath_03',
+      patient_id_display: 'PAT-2026-0893',
+      name: 'Manjunath Gowda',
+      age: 62,
+      sex: 'Male',
+      phone: '+91 98450 11223',
+      abha_id: '91-6677-8899-0011',
+      is_existing: false,
+      created_at: new Date().toISOString()
+    }
+  ]);
 
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredPatients = queuePatients.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.complaint.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.status.toLowerCase().includes(searchQuery.toLowerCase())
+  const filtered = queuePatients.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.patient_id_display.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.phone.includes(searchTerm)
   );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12 animate-fadeIn">
-      {/* Top Banner */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-parchment-400 pb-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Hospital Staff Operations</span>
-          <h1 className="text-xl font-bold text-white tracking-tight">Triage & Patient Queue Coordinator</h1>
-          <p className="text-xs text-slate-400">OPD Department • Apollo Multispeciality Bangalore</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-terracotta-light text-terracotta border border-terracotta/20 text-xs font-semibold mb-1">
+            <Users className="w-3.5 h-3.5" />
+            <span>Hospital Triage & Reception Workstation</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ink">
+            OPD Patient Queue & Vitals Desk
+          </h1>
         </div>
+
         <button
           type="button"
           onClick={onNewPatient}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-xs font-bold shadow-lg shadow-cyan-600/30 transition"
+          className="btn-terracotta text-xs px-5 py-2.5 shadow-warm"
         >
           <UserPlus className="w-4 h-4" />
-          <span>Register New Patient Intake</span>
+          <span>Register New Patient</span>
         </button>
       </div>
 
-      {/* Operational Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((st, idx) => {
-          const Icon = st.icon;
-          return (
-            <div key={idx} className={`p-5 rounded-2xl ${st.bg} border ${st.border} glass-card space-y-2`}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">{st.label}</span>
-                <Icon className={`w-5 h-5 ${st.color}`} />
-              </div>
-              <div className={`text-3xl font-black ${st.color}`}>{st.count}</div>
-            </div>
-          );
-        })}
+      {/* Nursing Triage Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="paper-card p-5 space-y-1">
+          <span className="text-xs font-semibold text-ink-graphite">Patients in OPD Queue</span>
+          <p className="text-2xl font-serif font-bold text-ink">3 Waiting</p>
+          <span className="text-[11px] text-terracotta font-medium">1 High Priority (Chest Pain)</span>
+        </div>
+
+        <div className="paper-card p-5 space-y-1">
+          <span className="text-xs font-semibold text-ink-graphite">Average Voice Intake Time</span>
+          <p className="text-2xl font-serif font-bold text-ink">1.8 Mins</p>
+          <span className="text-[11px] text-[#15803d] font-medium">78% faster than paper forms</span>
+        </div>
+
+        <div className="paper-card p-5 space-y-1">
+          <span className="text-xs font-semibold text-ink-graphite">OCR Prescription Ingestion</span>
+          <p className="text-2xl font-serif font-bold text-ink">98.4% Accuracy</p>
+          <span className="text-[11px] text-[#1e40af] font-medium">Apollo & Manipal Rx Presets</span>
+        </div>
       </div>
 
-      {/* Queue Table */}
-      <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Active Triage Queue</h3>
-            <span className="text-xs text-slate-400">({filteredPatients.length} patients)</span>
-          </div>
+      {/* Search & Patient List */}
+      <div className="paper-card p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-parchment-400 pb-3">
+          <h2 className="text-lg font-serif font-bold text-ink">
+            Active Patients Awaiting Consultation
+          </h2>
 
-          {/* Voice-Enabled Search Bar */}
-          <div className="relative flex items-center min-w-[260px] max-w-sm w-full md:w-auto">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3.5 top-2.5 text-ink-graphite" />
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, status, or symptom..."
-              className="w-full pl-8 pr-11 py-1.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, ID, or phone..."
+              className="pl-9 pr-4 py-2 text-xs bg-parchment border border-parchment-400 rounded-full text-ink focus:outline-none focus:border-terracotta w-64"
             />
-            <div className="absolute right-1 top-1/2 -translate-y-1/2">
-              <SpeechToText
-                value={searchQuery}
-                onChange={setSearchQuery}
-                language="en-IN"
-                size="sm"
-                placeholder="Speak patient name or search term"
-              />
-            </div>
           </div>
         </div>
 
-        <div className="divide-y divide-slate-800 text-xs">
-          {filteredPatients.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">
-              No patients found matching "{searchQuery}".
-            </div>
-          ) : (
-            filteredPatients.map((p) => (
-            <div 
-              key={p.id} 
-              className="p-4 flex flex-wrap items-center justify-between gap-4 hover:bg-slate-800/40 transition"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white ${
-                  p.status.includes('RED FLAG') ? 'bg-rose-600 animate-pulse' : 'bg-slate-800'
-                }`}>
-                  {p.name[0]}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-white">{p.name}</span>
-                    <span className="text-[11px] text-slate-400">({p.sex}, {p.age}Y)</span>
-                    {p.isDemo && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        Demo Patient
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-300 mt-0.5">{p.complaint}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold border ${
-                    p.status.includes('RED FLAG')
-                      ? 'bg-rose-950 text-rose-300 border-rose-600'
-                      : p.status.includes('Ready')
-                      ? 'bg-emerald-950 text-emerald-300 border-emerald-600'
-                      : 'bg-slate-900 text-amber-300 border-slate-700'
-                  }`}>
-                    {p.status}
-                  </span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5 font-mono">{p.time}</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const mockP: Patient = {
-                      id: p.id,
-                      patient_id_display: 'PAT-2026-0891',
-                      name: p.name,
-                      age: p.age,
-                      sex: p.sex,
-                      phone: '+91 98765 43210',
-                      abha_id: '91-8273-9912-0041',
-                      is_existing: true,
-                      created_at: new Date().toISOString()
-                    };
-                    onSelectPatient(mockP);
-                  }}
-                  className="px-3.5 py-1.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-semibold transition flex items-center gap-1"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>Open Story</span>
-                </button>
-              </div>
-            </div>
-          )))}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-parchment-200 text-ink-graphite uppercase font-semibold border-b border-parchment-400">
+              <tr>
+                <th className="p-3">Patient Name</th>
+                <th className="p-3">ID / ABHA</th>
+                <th className="p-3">Age/Sex</th>
+                <th className="p-3">Phone</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-parchment-400">
+              {filtered.map((pat) => (
+                <tr key={pat.id} className="hover:bg-parchment-300/50 transition">
+                  <td className="p-3 font-bold text-ink">{pat.name}</td>
+                  <td className="p-3 font-mono text-ink-graphite">
+                    <div>{pat.patient_id_display}</div>
+                    <div className="text-[10px] text-terracotta">{pat.abha_id || '91-8273-9912-0041'}</div>
+                  </td>
+                  <td className="p-3 text-ink-charcoal">{pat.age}Y, {pat.sex}</td>
+                  <td className="p-3 font-mono text-ink-graphite">{pat.phone}</td>
+                  <td className="p-3">
+                    <span className="px-2.5 py-0.5 rounded-full bg-parchment border border-parchment-400 text-ink text-[10px] font-semibold">
+                      Waiting for Doctor
+                    </span>
+                  </td>
+                  <td className="p-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onSelectPatient(pat)}
+                      className="btn-terracotta text-xs px-3.5 py-1.5"
+                    >
+                      <span>Open Doctor Station</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

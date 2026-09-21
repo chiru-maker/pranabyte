@@ -1,0 +1,19 @@
+# Robots.txt for Pranabyte Clinical Intelligence Platform
+# Production Domain: https://pranabyte.health
+
+User-agent: *
+Allow: /
+Allow: /privacy-policy
+Allow: /features
+Allow: /about
+
+# Disallow indexing of private clinical and administrative dashboards
+Disallow: /patient/
+Disallow: /doctor/
+Disallow: /staff/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+
+# XML Sitemap Location
+Sitemap: https://pranabyte.health/sitemap.xml

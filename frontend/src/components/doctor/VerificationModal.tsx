@@ -1,154 +1,149 @@
 import React, { useState } from 'react';
-import { ClinicalFact } from '../../types';
-import { Modal } from '../ui/Modal';
-import { CheckCircle2, Edit3, XCircle, AlertTriangle, Save } from 'lucide-react';
-import { StatusBadge } from '../ui/Badge';
+import { ClinicalFact, FactStatus } from '../../types';
+import { Badge } from '../ui/Badge';
+import { CheckCircle2, Edit3, XCircle, AlertCircle, ShieldCheck, FileText } from 'lucide-react';
 
 interface VerificationModalProps {
-  fact: ClinicalFact | null;
   isOpen: boolean;
   onClose: () => void;
+  fact: ClinicalFact | null;
   onVerify: (factId: string, action: string, editedValue?: string, notes?: string) => void;
 }
 
 export const VerificationModal: React.FC<VerificationModalProps> = ({
-  fact,
   isOpen,
   onClose,
+  fact,
   onVerify
 }) => {
-  if (!fact) return null;
+  if (!isOpen || !fact) return null;
 
-  const [action, setAction] = useState<string>('confirmed');
   const [editedValue, setEditedValue] = useState(fact.value);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(fact.doctor_notes || '');
+  const [action, setAction] = useState<string>('confirmed');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onVerify(fact.id, action, action === 'edited' ? editedValue : undefined, notes);
+  const handleSave = () => {
+    onVerify(fact.id, action, editedValue, notes);
     onClose();
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`Doctor Verification: ${fact.key_name}`}
-    >
-      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-        {/* Fact Header */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase font-bold">Category</span>
-            <div className="text-sm font-semibold text-white">{fact.key_name}</div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fadeIn">
+      <div className="max-w-xl w-full paper-card p-6 sm:p-8 space-y-5 shadow-warm-xl border border-parchment-400">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-parchment-400 pb-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-terracotta" />
+            <h2 className="font-serif font-bold text-ink text-lg">
+              Physician Fact Verification
+            </h2>
           </div>
-          <StatusBadge status={fact.status} confidence={fact.confidence} />
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-ink-graphite hover:text-ink font-bold text-lg"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Current Value */}
-        <div>
-          <label className="block text-slate-400 font-semibold mb-1">Clinical Value</label>
-          {action === 'edited' ? (
-            <textarea
-              rows={2}
-              value={editedValue}
-              onChange={(e) => setEditedValue(e.target.value)}
-              className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-xs"
-            />
-          ) : (
-            <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-slate-200">
-              {fact.value}
-            </div>
+        {/* Fact Summary */}
+        <div className="p-4 rounded-2xl bg-parchment border border-parchment-400 space-y-2 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-ink text-sm">{fact.key_name}</span>
+            <Badge status={fact.status} size="sm" />
+          </div>
+          {fact.source_citation && (
+            <p className="text-ink-graphite">
+              <strong>Source:</strong> {fact.source_citation}
+            </p>
           )}
         </div>
 
-        {/* Doctor Verification Actions */}
-        <div>
-          <label className="block text-slate-400 font-semibold mb-2">Select Clinician Verification Action</label>
-          <div className="grid grid-cols-2 gap-2">
+        {/* Edit Value */}
+        <div className="space-y-1.5 text-xs">
+          <label className="block text-ink font-semibold">
+            Clinical Statement / Dosage Value:
+          </label>
+          <textarea
+            rows={3}
+            value={editedValue}
+            onChange={(e) => setEditedValue(e.target.value)}
+            className="w-full p-3 bg-white border border-parchment-400 rounded-xl text-ink text-xs focus:outline-none focus:border-terracotta"
+          />
+        </div>
+
+        {/* Action Choice */}
+        <div className="space-y-1.5 text-xs">
+          <label className="block text-ink font-semibold">Physician Action:</label>
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => setAction('confirmed')}
-              className={`p-3 rounded-xl border flex items-center gap-2 font-semibold transition ${
+              className={`p-2.5 rounded-xl border text-center font-semibold transition ${
                 action === 'confirmed'
-                  ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-[#dcfce7] text-[#15803d] border-[#86efac]'
+                  : 'bg-parchment border-parchment-400 text-ink'
               }`}
             >
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Confirm Fact (🟢)</span>
+              ✓ Confirm (Legal)
             </button>
-
-            <button
-              type="button"
-              onClick={() => setAction('edited')}
-              className={`p-3 rounded-xl border flex items-center gap-2 font-semibold transition ${
-                action === 'edited'
-                  ? 'bg-sky-950/80 border-sky-500 text-sky-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              <Edit3 className="w-4 h-4 text-sky-400" />
-              <span>Edit Value</span>
-            </button>
-
             <button
               type="button"
               onClick={() => setAction('marked_uncertain')}
-              className={`p-3 rounded-xl border flex items-center gap-2 font-semibold transition ${
+              className={`p-2.5 rounded-xl border text-center font-semibold transition ${
                 action === 'marked_uncertain'
-                  ? 'bg-amber-950/80 border-amber-500 text-amber-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-[#fef3c7] text-[#b45309] border-[#fde68a]'
+                  : 'bg-parchment border-parchment-400 text-ink'
               }`}
             >
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <span>Mark Uncertain (🟡)</span>
+              ? Mark Uncertain
             </button>
-
             <button
               type="button"
               onClick={() => setAction('rejected')}
-              className={`p-3 rounded-xl border flex items-center gap-2 font-semibold transition ${
+              className={`p-2.5 rounded-xl border text-center font-semibold transition ${
                 action === 'rejected'
-                  ? 'bg-rose-950/80 border-rose-500 text-rose-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]'
+                  : 'bg-parchment border-parchment-400 text-ink'
               }`}
             >
-              <XCircle className="w-4 h-4 text-rose-400" />
-              <span>Reject / Dismiss</span>
+              ✕ Reject Fact
             </button>
           </div>
         </div>
 
-        {/* Doctor clinical notes */}
-        <div>
-          <label className="block text-slate-400 font-semibold mb-1">Clinician Notes & Rationale</label>
+        {/* Doctor Notes */}
+        <div className="space-y-1.5 text-xs">
+          <label className="block text-ink font-semibold">Clinician Verification Notes (Optional):</label>
           <input
             type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="e.g. Verified with patient, ECG ordered..."
-            className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-xs"
+            placeholder="e.g. Verified during physical examination; restart Aspirin under care."
+            className="w-full px-3 py-2 bg-white border border-parchment-400 rounded-xl text-ink text-xs focus:outline-none focus:border-terracotta"
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+        {/* Footer */}
+        <div className="flex justify-end gap-2 pt-2 border-t border-parchment-400">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs"
+            className="btn-secondary-paper text-xs px-4 py-2"
           >
             Cancel
           </button>
           <button
-            type="submit"
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-semibold text-xs shadow-lg shadow-cyan-600/30 flex items-center gap-1.5"
+            type="button"
+            onClick={handleSave}
+            className="btn-terracotta text-xs px-5 py-2 shadow-warm"
           >
-            <Save className="w-3.5 h-3.5" />
-            <span>Save Verification</span>
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Save & Apply Verification</span>
           </button>
         </div>
-      </form>
-    </Modal>
+      </div>
+    </div>
   );
 };

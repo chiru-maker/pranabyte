@@ -2,12 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { apiClient } from '../api/client';
 
+export type UserRole = 'patient' | 'doctor' | 'staff' | 'admin';
+
 interface AuthContextType {
   user: User | null;
-  role: 'patient' | 'doctor' | 'staff';
+  role: UserRole;
   token: string | null;
   login: (email: string, pass: string) => Promise<void>;
-  switchRole: (newRole: 'patient' | 'doctor' | 'staff') => void;
+  switchRole: (newRole: UserRole) => void;
   logout: () => void;
 }
 
@@ -21,10 +23,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role: 'doctor',
     is_active: true
   });
-  const [role, setRole] = useState<'patient' | 'doctor' | 'staff'>('doctor');
+  const [role, setRole] = useState<UserRole>('doctor');
   const [token, setToken] = useState<string | null>(localStorage.getItem('auth_token'));
 
-  const switchRole = (newRole: 'patient' | 'doctor' | 'staff') => {
+  const switchRole = (newRole: UserRole) => {
     setRole(newRole);
     if (newRole === 'doctor') {
       setUser({
@@ -40,6 +42,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: 'staff@hospital.in',
         full_name: 'Sister Ananya Rao (Triage Nurse)',
         role: 'staff',
+        is_active: true
+      });
+    } else if (newRole === 'admin') {
+      setUser({
+        id: 'usr_adm_01',
+        email: 'rajesh.admin@pranabyte.health',
+        full_name: 'Rajesh V. (Compliance Admin)',
+        role: 'admin',
         is_active: true
       });
     } else {
@@ -61,10 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(res.user);
       setRole(res.user.role);
     } catch (e) {
-      console.warn('Fallback local demo login:', e);
-      // Auto fallback to demo user
       if (email.includes('doctor')) switchRole('doctor');
       else if (email.includes('staff')) switchRole('staff');
+      else if (email.includes('admin')) switchRole('admin');
       else switchRole('patient');
     }
   };

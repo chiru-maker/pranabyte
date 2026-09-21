@@ -1,196 +1,142 @@
 import React from 'react';
-import { 
-  UserCheck, 
-  Mic, 
-  FileSearch, 
-  GitCompare, 
-  ShieldAlert, 
-  Stethoscope, 
-  CheckCircle2, 
-  ArrowRight,
-  Clock,
-  Sparkles
-} from 'lucide-react';
-
-interface Stage {
-  id: string;
-  title: string;
-  subtitle: string;
-  status: 'completed' | 'active' | 'pending';
-  icon: React.ElementType;
-  time: string;
-  details: string;
-  metrics?: { label: string; value: string };
-}
+import { Visit, Patient } from '../../types';
+import { Mic, Cpu, HelpCircle, UserCheck, Stethoscope, FileCheck, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 interface CaseJourneyViewProps {
-  patientName: string;
-  patientId: string;
-  visitNumber: string;
-  onNavigateTab?: (tab: string) => void;
+  patient: Patient;
+  visit: Visit;
+  onOpenBrief?: () => void;
 }
 
 export const CaseJourneyView: React.FC<CaseJourneyViewProps> = ({
-  patientName,
-  patientId,
-  visitNumber,
-  onNavigateTab
+  patient,
+  visit,
+  onOpenBrief
 }) => {
-  const stages: Stage[] = [
+  const steps = [
     {
-      id: 'consent',
-      title: '1. Registration & Consent',
-      subtitle: 'ABHA Linkage & AI Disclosure',
-      status: 'completed',
-      icon: UserCheck,
-      time: '09:15 AM',
-      details: 'ABHA 91-8273-9912-0041 linked. Consent v1.0.0 signed with explicit AI assistance disclosure.',
-      metrics: { label: 'Consent Status', value: 'VERIFIED' }
-    },
-    {
-      id: 'intake',
-      title: '2. Multimodal Intake',
-      subtitle: 'Voice & Document OCR',
-      status: 'completed',
+      id: 1,
+      name: "1. Patient's Spoken Words",
       icon: Mic,
-      time: '09:18 AM',
-      details: 'Patient voice recorded in Hindi/English. Apollo Prescription OCR parsed with 98% confidence.',
-      metrics: { label: 'Questions Avoided', value: '12 Avoided' }
-    },
-    {
-      id: 'extraction',
-      title: '3. Evidence Linking',
-      subtitle: '4-State Fact Tagging',
       status: 'completed',
-      icon: FileSearch,
-      time: '09:19 AM',
-      details: '8 clinical facts extracted and tagged with 🟢 CONFIRMED, 🔵 DOCUMENTED, or 🟡 UNCERTAIN provenance.',
-      metrics: { label: 'Facts Extracted', value: '8 Facts' }
+      detail: "Spoken intake in native tongue: 'Stopped aspirin 2 months ago, chest pain for 3 days...'",
+      actor: 'Patient (Spoken Intake)'
     },
     {
-      id: 'conflicts',
-      title: '4. Conflict & Safety Scan',
-      subtitle: 'Contradiction & Red-Flags',
+      id: 2,
+      name: "2. AI Entity Extraction",
+      icon: Cpu,
       status: 'completed',
-      icon: GitCompare,
-      time: '09:20 AM',
-      details: 'Detected Aspirin discontinuation mismatch & Cardiopulmonary symptom cluster.',
-      metrics: { label: 'Alerts Active', value: '1 Conflict / 1 Flag' }
+      detail: '7 clinical facts extracted across 4 information states (Confirmed, Documented, Uncertain, Conflicting).',
+      actor: 'Pranabyte Extraction Engine'
     },
     {
-      id: 'doctor',
-      title: '5. Doctor Verification',
-      subtitle: 'Physician Review & Override',
-      status: 'active',
+      id: 3,
+      name: "3. Adaptive Q&A & Avoidance",
+      icon: HelpCircle,
+      status: 'completed',
+      detail: '12 redundant questions avoided based on prior Apollo Hospital records. Probed pain radiation.',
+      actor: 'Adaptive Engine'
+    },
+    {
+      id: 4,
+      name: '4. Patient Self-Review',
+      icon: UserCheck,
+      status: visit.patient_confirmed ? 'completed' : 'active',
+      detail: 'Patient reviewed extracted symptoms and confirmed timeline accuracy.',
+      actor: 'Patient Self-Service'
+    },
+    {
+      id: 5,
+      name: '5. Clinician Verification',
       icon: Stethoscope,
-      time: 'Current Stage',
-      details: 'Dr. Priya Sharma reviewing 30-Second Brief, verifying facts, and resolving discrepancy.',
-      metrics: { label: 'EHR Readiness', value: '92% Complete' }
+      status: visit.doctor_verified ? 'completed' : 'active',
+      detail: visit.doctor_verified
+        ? 'Verified and signed off by Dr. Priya Sharma.'
+        : 'In review: Clinician verifying facts and resolving medication discrepancy.',
+      actor: 'Dr. Priya Sharma'
     },
     {
-      id: 'export',
-      title: '6. FHIR R4 Finalization',
-      subtitle: 'Interoperable EHR Export',
-      status: 'pending',
-      icon: CheckCircle2,
-      time: 'Next',
-      details: 'Generate signed FHIR R4 Bundle and printable OPD Case Sheet for hospital EHR.',
-      metrics: { label: 'Standard', value: 'ABDM / FHIR R4' }
+      id: 6,
+      name: '6. Final FHIR Case & Follow-Up',
+      icon: FileCheck,
+      status: visit.doctor_verified ? 'completed' : 'pending',
+      detail: 'Standard HL7 FHIR R4 Bundle serialized and archived to hospital EHR.',
+      actor: 'Hospital EHR Integration'
     }
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-cyan-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-mono font-semibold">
-              Live Pipeline Tracking
+    <div className="space-y-6 animate-fadeIn">
+      {/* Overview Card */}
+      <div className="paper-card p-6 border-terracotta/30 bg-[#f5eee1] space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-parchment-400 pb-3">
+          <div>
+            <span className="text-xs uppercase font-bold text-terracotta tracking-wider">
+              Signature Visualizer
             </span>
-            <span className="text-xs text-slate-400">Visit #{visitNumber}</span>
+            <h2 className="text-xl font-serif font-bold text-ink">
+              Patient Case Journey Pipeline
+            </h2>
           </div>
-          <h2 className="text-xl font-bold text-white mt-1">
-            Clinical Journey & Data Provenance: <span className="text-cyan-400">{patientName}</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Real-time step-by-step audit trace from patient voice intake to final clinician sign-off.
-          </p>
+          <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-parchment border border-parchment-400 text-ink">
+            Visit Ref: {visit.visit_number}
+          </span>
         </div>
-
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className="text-xs text-slate-400">Pipeline Velocity</div>
-            <div className="text-sm font-bold text-emerald-400 flex items-center gap-1 justify-end">
-              <Clock className="w-3.5 h-3.5" /> 4.2 Mins Total
-            </div>
-          </div>
-        </div>
+        <p className="text-xs text-ink-charcoal leading-relaxed">
+          Transparent, step-by-step lifecycle of patient health data from initial spoken complaint to final verified electronic medical record.
+        </p>
       </div>
 
-      {/* Pipeline Stage Cards */}
+      {/* Step Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stages.map((stg, idx) => {
-          const Icon = stg.icon;
-          const isCompleted = stg.status === 'completed';
-          const isActive = stg.status === 'active';
+        {steps.map((step) => {
+          const Icon = step.icon;
+          const isDone = step.status === 'completed';
+          const isActive = step.status === 'active';
 
           return (
             <div
-              key={stg.id}
-              className={`rounded-2xl p-5 border transition-all relative overflow-hidden flex flex-col justify-between ${
-                isActive
-                  ? 'bg-gradient-to-b from-cyan-950/50 to-slate-900 border-cyan-500 shadow-lg shadow-cyan-500/10'
-                  : isCompleted
-                  ? 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
-                  : 'bg-slate-950/40 border-slate-800/40 opacity-60'
+              key={step.id}
+              className={`p-5 rounded-3xl border transition-all ${
+                isDone
+                  ? 'bg-parchment border-[#86efac] shadow-warm-sm'
+                  : isActive
+                  ? 'bg-parchment border-terracotta shadow-warm ring-2 ring-terracotta/20'
+                  : 'bg-parchment/60 border-parchment-400 opacity-75'
               }`}
             >
-              {isActive && (
-                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl pointer-events-none" />
-              )}
-
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      isActive
-                        ? 'bg-cyan-500 text-slate-950 font-bold shadow-lg shadow-cyan-500/30 animate-pulse'
-                        : isCompleted
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : 'bg-slate-800 text-slate-500'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </div>
-
-                  <span
-                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                      isActive
-                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                        : isCompleted
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-slate-800 text-slate-500'
-                    }`}
-                  >
-                    {stg.status}
-                  </span>
+              <div className="flex items-center justify-between mb-3">
+                <div
+                  className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+                    isDone
+                      ? 'bg-[#dcfce7] text-[#15803d]'
+                      : isActive
+                      ? 'bg-terracotta text-white'
+                      : 'bg-parchment-300 text-ink-muted'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
                 </div>
-
-                <h4 className="font-bold text-white text-base">{stg.title}</h4>
-                <p className="text-xs text-cyan-400/90 font-medium">{stg.subtitle}</p>
-                <p className="text-xs text-slate-400 mt-2.5 leading-relaxed">{stg.details}</p>
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    isDone
+                      ? 'bg-[#dcfce7] text-[#15803d]'
+                      : isActive
+                      ? 'bg-terracotta-light text-terracotta'
+                      : 'bg-parchment-300 text-ink-muted'
+                  }`}
+                >
+                  {step.status}
+                </span>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                <span className="text-slate-500 flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {stg.time}
-                </span>
-                {stg.metrics && (
-                  <span className="font-mono text-cyan-300 font-bold text-[11px] bg-slate-800 px-2 py-0.5 rounded">
-                    {stg.metrics.value}
-                  </span>
-                )}
+              <h3 className="font-serif font-bold text-ink text-sm mb-1">{step.name}</h3>
+              <p className="text-xs text-ink-charcoal leading-relaxed mb-3">{step.detail}</p>
+
+              <div className="pt-2 border-t border-parchment-300 flex items-center justify-between text-[11px] text-ink-graphite font-medium">
+                <span>Actor:</span>
+                <span className="font-semibold text-ink">{step.actor}</span>
               </div>
             </div>
           );
